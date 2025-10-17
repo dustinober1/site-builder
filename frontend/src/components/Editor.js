@@ -3,6 +3,7 @@ import './Editor.css';
 import Canvas from './Canvas';
 import Toolbar from './Toolbar';
 import PropertiesPanel from './PropertiesPanel';
+import PreviewModal from './PreviewModal';
 import axios from 'axios';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -13,6 +14,7 @@ function Editor({ project, onBack }) {
   const [selectedBlockId, setSelectedBlockId] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [message, setMessage] = useState('');
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const handleAddBlock = useCallback((type) => {
     const newBlock = {
@@ -95,6 +97,13 @@ function Editor({ project, onBack }) {
             </div>
           )}
           <button
+            className="preview-button"
+            onClick={() => setIsPreviewOpen(true)}
+            aria-label="Preview the course before exporting"
+          >
+            👁 Preview
+          </button>
+          <button
             className="generate-button"
             onClick={handleGenerateSite}
             disabled={isGenerating}
@@ -120,6 +129,15 @@ function Editor({ project, onBack }) {
           onDelete={handleDeleteBlock}
         />
       </div>
+
+      <PreviewModal
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        pages={project.pages.map(p => 
+          p.id === currentPage.id ? { ...p, content: blocks } : p
+        )}
+        projectName={project.name}
+      />
     </div>
   );
 }
