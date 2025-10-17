@@ -56,6 +56,39 @@
   border-radius: 4px;
 }
 
+.preview-knowledge-check,
+.preview-advanced-question,
+.preview-branching-scenario {
+  width: 100%;
+  padding: 1rem;
+  background-color: var(--light-gray);
+  border-radius: 4px;
+  border-left: 4px solid var(--royal-blue);
+}
+
+.preview-knowledge-check p,
+.preview-advanced-question p,
+.preview-branching-scenario p {
+  margin: 0 0 0.5rem 0;
+  color: var(--midnight-blue);
+  font-size: 0.95rem;
+}
+
+.preview-knowledge-check ul,
+.preview-advanced-question ul,
+.preview-branching-scenario ul {
+  margin: 0.5rem 0 0 1rem;
+  padding: 0;
+  font-size: 0.9rem;
+  color: var(--dark-gray);
+}
+
+.preview-knowledge-check li,
+.preview-advanced-question li,
+.preview-branching-scenario li {
+  margin: 0.25rem 0;
+}
+
 .block-controls {
   display: flex;
   justify-content: space-between;

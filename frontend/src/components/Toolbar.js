@@ -6,7 +6,10 @@ function Toolbar({ onAddBlock }) {
     { type: 'text', label: 'Text', icon: '📝' },
     { type: 'heading', label: 'Heading', icon: '📌' },
     { type: 'image', label: 'Image', icon: '🖼️' },
-    { type: 'video', label: 'Video', icon: '🎥' }
+    { type: 'video', label: 'Video', icon: '🎥' },
+    { type: 'knowledge-check', label: 'Knowledge Check', icon: '✓' },
+    { type: 'advanced-question', label: 'Advanced Question', icon: '❓' },
+    { type: 'branching-scenario', label: 'Branching Scenario', icon: '🔀' }
   ];
 
   return (

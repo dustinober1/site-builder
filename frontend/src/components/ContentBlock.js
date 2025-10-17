@@ -27,6 +27,39 @@ function ContentBlock({
             <p>🎥 Video: {block.url || 'No URL set'}</p>
           </div>
         );
+      case 'knowledge-check':
+        return (
+          <div className="preview-knowledge-check">
+            <p><strong>✓ Knowledge Check:</strong> {block.question || 'Question not set'}</p>
+            {block.options && block.options.length > 0 && (
+              <ul>
+                {block.options.map((opt, i) => (
+                  <li key={i}>○ {opt}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        );
+      case 'advanced-question':
+        return (
+          <div className="preview-advanced-question">
+            <p><strong>❓ Advanced Question:</strong> {block.question || 'Question not set'}</p>
+            {block.answer && <p><em>Answer: {block.answer.substring(0, 100)}...</em></p>}
+          </div>
+        );
+      case 'branching-scenario':
+        return (
+          <div className="preview-branching-scenario">
+            <p><strong>🔀 Branching Scenario:</strong> {block.scenario || 'Scenario not set'}</p>
+            {block.paths && block.paths.length > 0 && (
+              <ul>
+                {block.paths.map((path, i) => (
+                  <li key={i}>→ {path.choice}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        );
       default:
         return <p>{block.content}</p>;
     }

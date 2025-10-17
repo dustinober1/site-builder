@@ -41,14 +41,54 @@ function Editor({ project, onBack }) {
   }, [blocks, currentPage, project]);
 
   const handleAddBlock = useCallback((type) => {
-    const newBlock = {
+    let newBlock = {
       id: Date.now(),
       type,
-      content: `New ${type}`,
+      content: '',
       alt: '',
       title: '',
       url: ''
     };
+
+    // Initialize with appropriate default properties based on type
+    switch(type) {
+      case 'knowledge-check':
+        newBlock = {
+          ...newBlock,
+          question: 'Enter question here',
+          options: ['Option 1', 'Option 2', 'Option 3', 'Option 4'],
+          correctAnswer: 0,
+          feedback: ''
+        };
+        break;
+      case 'advanced-question':
+        newBlock = {
+          ...newBlock,
+          question: 'Enter question here',
+          answer: '',
+          explanation: ''
+        };
+        break;
+      case 'branching-scenario':
+        newBlock = {
+          ...newBlock,
+          scenario: 'Describe the scenario here',
+          paths: [
+            { choice: 'Choice 1', outcome: 'What happens if they choose this' },
+            { choice: 'Choice 2', outcome: 'What happens if they choose this' }
+          ]
+        };
+        break;
+      case 'heading':
+        newBlock = { ...newBlock, content: 'New Heading' };
+        break;
+      case 'text':
+        newBlock = { ...newBlock, content: 'New text content' };
+        break;
+      default:
+        newBlock = { ...newBlock, content: `New ${type}` };
+    }
+
     setBlocks([...blocks, newBlock]);
     setSelectedBlockId(newBlock.id);
   }, [blocks]);
