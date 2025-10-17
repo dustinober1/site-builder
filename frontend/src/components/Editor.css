@@ -11,10 +11,10 @@
   padding: 1rem 2rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   display: flex;
-  justify-content: space-between;
   align-items: center;
   gap: 2rem;
-  flex-wrap: wrap;
+  min-height: 60px;
+  position: relative;
 }
 
 .header-left {
@@ -22,6 +22,9 @@
   align-items: center;
   gap: 1rem;
   min-width: 0;
+  flex: 1 1 auto;
+  position: relative;
+  z-index: 1;
 }
 
 .header-left h1 {
@@ -29,6 +32,11 @@
   font-size: 1.5rem;
   margin: 0;
   word-break: break-word;
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .back-button {
@@ -40,7 +48,9 @@
   cursor: pointer;
   font-weight: 500;
   transition: all 0.3s;
-  flex-shrink: 0;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  min-width: fit-content;
 }
 
 .back-button:hover {
@@ -56,18 +66,25 @@
 .header-right {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  min-width: 0;
+  gap: 1rem;
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  min-width: fit-content;
+  justify-content: flex-end;
+  position: relative;
+  z-index: 2;
 }
 
 .message {
   padding: 0.75rem 1rem;
   border-radius: 4px;
   font-size: 0.9rem;
-  max-width: 300px;
   animation: slideIn 0.3s ease;
-  flex: 0 1 auto;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .message.success {
@@ -101,7 +118,7 @@
   transition: all 0.3s;
   border: 2px solid transparent;
   white-space: nowrap;
-  flex-shrink: 0;
+  flex: 0 0 auto;
 }
 
 .preview-button {
@@ -145,11 +162,29 @@
 }
 
 @media (max-width: 1024px) {
-  .editor-content {
-    flex-direction: column;
+  .editor-header {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .header-left {
+    order: 1;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .header-right {
+    order: 2;
+    flex: 1 1 auto;
+    justify-content: flex-start;
+    gap: 0.75rem;
   }
 
   .message {
     display: none;
+  }
+
+  .editor-content {
+    flex-direction: column;
   }
 }
