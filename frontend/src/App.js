@@ -1,12 +1,20 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import './App.css';
 import Editor from './components/Editor';
 import ProjectList from './components/ProjectList';
 import WelcomeScreen from './components/WelcomeScreen';
+import { getAllProjects } from './utils/projectStorage';
 
 function App() {
   const [currentView, setCurrentView] = useState('welcome'); // welcome, projects, editor
   const [currentProject, setCurrentProject] = useState(null);
+  const [hasProjects, setHasProjects] = useState(false);
+
+  // Check if there are saved projects on component mount
+  useEffect(() => {
+    const projects = getAllProjects();
+    setHasProjects(projects.length > 0);
+  }, []);
 
   const handleCreateProject = useCallback((projectName) => {
     const newProject = {

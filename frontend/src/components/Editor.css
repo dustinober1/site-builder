@@ -188,3 +188,22 @@
     flex-direction: column;
   }
 }
+
+.auto-save-status {
+  color: #b6cbe1;
+  font-size: 0.85rem;
+  font-weight: 500;
+  animation: fadeInOut 3s ease-in-out;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

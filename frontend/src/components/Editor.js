@@ -1,9 +1,10 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import './Editor.css';
 import Canvas from './Canvas';
 import Toolbar from './Toolbar';
 import PropertiesPanel from './PropertiesPanel';
 import PreviewModal from './PreviewModal';
+import { autoSaveProject, saveProject } from '../utils/projectStorage';
 import axios from 'axios';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -15,6 +16,29 @@ function Editor({ project, onBack }) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [message, setMessage] = useState('');
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState('');
+
+  // Auto-save project when blocks change
+  useEffect(() => {
+    const autoSaveTimer = setTimeout(() => {
+      if (project && blocks.length > 0) {
+        const updatedProject = {
+          ...project,
+          pages: project.pages.map(page =>
+            page.id === currentPage.id ? { ...page, content: blocks } : page
+          ),
+          lastAutoSave: new Date().toISOString()
+        };
+        
+        if (autoSaveProject(updatedProject)) {
+          setAutoSaveStatus('✓ Auto-saved');
+          setTimeout(() => setAutoSaveStatus(''), 3000);
+        }
+      }
+    }, 2000); // Auto-save after 2 seconds of inactivity
+
+    return () => clearTimeout(autoSaveTimer);
+  }, [blocks, currentPage, project]);
 
   const handleAddBlock = useCallback((type) => {
     const newBlock = {
@@ -85,6 +109,9 @@ function Editor({ project, onBack }) {
             ← Back
           </button>
           <h1>{project.name}</h1>
+          {autoSaveStatus && (
+            <span className="auto-save-status">{autoSaveStatus}</span>
+          )}
         </div>
         <div className="header-right">
           {message && (
