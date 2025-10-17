@@ -10,10 +10,69 @@ const scormCompliance = require('./scorm-compliance');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Logging Middleware
+const logger = (req, res, next) => {
+  const timestamp = new Date().toISOString();
+  console.log(`[${timestamp}] ${req.method} ${req.url}`);
+  next();
+};
+
+// Error Handler Middleware
+const errorHandler = (err, req, res, next) => {
+  const timestamp = new Date().toISOString();
+  console.error(`[${timestamp}] ERROR:`, err.message);
+  console.error(err.stack);
+  
+  res.status(err.status || 500).json({
+    success: false,
+    error: {
+      message: err.message || 'Internal server error',
+      timestamp,
+      path: req.url
+    }
+  });
+};
+
+// Request Validator Middleware
+const validateRequest = (schema) => {
+  return (req, res, next) => {
+    const errors = [];
+    
+    for (const [field, rules] of Object.entries(schema)) {
+      const value = req.body[field];
+      
+      if (rules.required && !value) {
+        errors.push(`Field '${field}' is required`);
+      }
+      
+      if (rules.type && value && typeof value !== rules.type) {
+        errors.push(`Field '${field}' must be of type ${rules.type}`);
+      }
+      
+      if (rules.minLength && value && value.length < rules.minLength) {
+        errors.push(`Field '${field}' must be at least ${rules.minLength} characters`);
+      }
+    }
+    
+    if (errors.length > 0) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          message: 'Validation failed',
+          details: errors
+        }
+      });
+    }
+    
+    next();
+  };
+};
+
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(logger);
 app.use('/uploads', express.static('uploads'));
 app.use('/sites', express.static('../output-sites'));
 
@@ -32,45 +91,118 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage: storage });
+const fileFilter = (req, file, cb) => {
+  const allowedImageTypes = /jpeg|jpg|png|gif|svg/;
+  const allowedVideoTypes = /mp4|webm|ogg/;
+  
+  const extname = path.extname(file.originalname).toLowerCase().replace('.', '');
+  
+  if (file.fieldname === 'image' && allowedImageTypes.test(extname)) {
+    cb(null, true);
+  } else if (file.fieldname === 'video' && allowedVideoTypes.test(extname)) {
+    cb(null, true);
+  } else {
+    cb(new Error(`Invalid file type: ${extname}. Allowed types: ${file.fieldname === 'image' ? 'jpeg, jpg, png, gif, svg' : 'mp4, webm, ogg'}`), false);
+  }
+};
+
+const upload = multer({ 
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 50 * 1024 * 1024 // 50MB limit
+  }
+});
 
 // Routes
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Site Builder API is running' });
+  res.json({ 
+    success: true,
+    status: 'OK', 
+    message: 'Site Builder API is running',
+    timestamp: new Date().toISOString(),
+    version: '1.0.0'
+  });
 });
 
 // Upload image
-app.post('/api/upload/image', upload.single('image'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: 'No file uploaded' });
+app.post('/api/upload/image', upload.single('image'), (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ 
+        success: false,
+        error: {
+          message: 'No file uploaded',
+          hint: 'Please select an image file to upload'
+        }
+      });
+    }
+    
+    console.log(`Image uploaded successfully: ${req.file.filename}`);
+    
+    res.json({
+      success: true,
+      message: 'Image uploaded successfully',
+      data: {
+        url: `/uploads/${req.file.filename}`,
+        filename: req.file.filename,
+        size: req.file.size,
+        mimeType: req.file.mimetype
+      }
+    });
+  } catch (error) {
+    next(error);
   }
-  res.json({
-    success: true,
-    url: `/uploads/${req.file.filename}`,
-    filename: req.file.filename
-  });
 });
 
 // Upload video
-app.post('/api/upload/video', upload.single('video'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: 'No file uploaded' });
+app.post('/api/upload/video', upload.single('video'), (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ 
+        success: false,
+        error: {
+          message: 'No file uploaded',
+          hint: 'Please select a video file to upload'
+        }
+      });
+    }
+    
+    console.log(`Video uploaded successfully: ${req.file.filename}`);
+    
+    res.json({
+      success: true,
+      message: 'Video uploaded successfully',
+      data: {
+        url: `/uploads/${req.file.filename}`,
+        filename: req.file.filename,
+        size: req.file.size,
+        mimeType: req.file.mimetype
+      }
+    });
+  } catch (error) {
+    next(error);
   }
-  res.json({
-    success: true,
-    url: `/uploads/${req.file.filename}`,
-    filename: req.file.filename
-  });
 });
 
 // Generate static site from page data
-app.post('/api/generate/site', (req, res) => {
+app.post('/api/generate/site', validateRequest({
+  projectName: { required: true, type: 'string', minLength: 1 },
+  pages: { required: true, type: 'object' }
+}), (req, res, next) => {
   try {
     const { projectName, pages } = req.body;
     
-    if (!projectName || !pages) {
-      return res.status(400).json({ error: 'Missing projectName or pages' });
+    if (!Array.isArray(pages) || pages.length === 0) {
+      return res.status(400).json({ 
+        success: false,
+        error: {
+          message: 'Pages must be a non-empty array'
+        }
+      });
     }
+
+    console.log(`Generating site for project: ${projectName}`);
 
     const outputDir = path.join(process.env.OUTPUT_DIR || '../output-sites', projectName);
     if (!fs.existsSync(outputDir)) {
@@ -85,6 +217,7 @@ app.post('/api/generate/site', (req, res) => {
         path.join(outputDir, `${filename}.html`),
         htmlContent
       );
+      console.log(`Generated page: ${filename}.html`);
     });
 
     // Generate index page
@@ -101,15 +234,20 @@ app.post('/api/generate/site', (req, res) => {
       cssContent
     );
 
+    console.log(`Site generated successfully at: ${outputDir}`);
+
     res.json({
       success: true,
       message: 'Site generated successfully',
-      path: `/sites/${projectName}/index.html`,
-      directory: outputDir
+      data: {
+        path: `/sites/${projectName}/index.html`,
+        directory: outputDir,
+        pagesGenerated: pages.length,
+        timestamp: new Date().toISOString()
+      }
     });
   } catch (error) {
-    console.error('Error generating site:', error);
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 });
 
@@ -675,7 +813,29 @@ function escapeHtml(text) {
     .replace(/'/g, '&#039;');
 }
 
+// Error Handler (must be last)
+app.use(errorHandler);
+
+// 404 Handler
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    error: {
+      message: 'Route not found',
+      path: req.url,
+      method: req.method
+    }
+  });
+});
+
 // Start server
 app.listen(PORT, () => {
-  console.log(`Site Builder backend running on http://localhost:${PORT}`);
+  const timestamp = new Date().toISOString();
+  console.log(`\n${'='.repeat(60)}`);
+  console.log(`🚀 Site Builder API Server`);
+  console.log(`${'='.repeat(60)}`);
+  console.log(`📍 URL: http://localhost:${PORT}`);
+  console.log(`⏰ Started: ${timestamp}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`${'='.repeat(60)}\n`);
 });

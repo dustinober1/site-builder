@@ -1,36 +1,39 @@
 .toolbar {
-  width: 280px;
-  background-color: var(--white);
-  border-right: 1px solid var(--light-gray);
+  width: 300px;
+  background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+  border-right: 1px solid var(--medium-gray);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  box-shadow: var(--shadow-sm);
 }
 
 .toolbar-content {
-  padding: 1.5rem;
+  padding: 2rem 1.5rem;
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
 .toolbar h2 {
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   color: var(--midnight-blue);
   margin: 0;
+  letter-spacing: -0.3px;
 }
 
 .toolbar-hint {
-  color: var(--dark-gray);
+  color: #666;
   font-size: 0.9rem;
   margin: 0;
+  line-height: 1.5;
 }
 
 .block-buttons {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .block-button {
@@ -38,59 +41,88 @@
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  padding: 1rem;
-  background-color: var(--light-gray);
-  border: 2px solid var(--dark-gray);
-  border-radius: 6px;
+  padding: 1.25rem 1rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border: 2px solid var(--medium-gray);
+  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-base);
   color: var(--midnight-blue);
-  font-weight: 500;
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.block-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, var(--royal-blue) 0%, var(--baby-blue) 100%);
+  opacity: 0;
+  transition: opacity var(--transition-base);
 }
 
 .block-button:hover {
-  background-color: var(--baby-blue);
   border-color: var(--royal-blue);
-  transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.block-button:hover::before {
+  opacity: 0.05;
 }
 
 .block-button:focus-visible {
-  outline: 2px solid var(--royal-blue);
+  outline: 3px solid var(--royal-blue);
   outline-offset: 2px;
 }
 
 .block-button .icon {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
+  position: relative;
+  z-index: 1;
+  transition: transform var(--transition-base);
+}
+
+.block-button:hover .icon {
+  transform: scale(1.1);
 }
 
 .block-button .label {
   font-size: 0.85rem;
+  position: relative;
+  z-index: 1;
 }
 
 .toolbar-info {
-  background-color: var(--baby-blue);
-  padding: 1rem;
-  border-radius: 6px;
+  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+  padding: 1.25rem;
+  border-radius: 12px;
   border-left: 4px solid var(--royal-blue);
+  box-shadow: var(--shadow-sm);
 }
 
 .toolbar-info h3 {
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.75rem 0;
   color: var(--midnight-blue);
-  font-size: 0.95rem;
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .toolbar-info ul {
   margin: 0;
   padding-left: 1.5rem;
-  font-size: 0.85rem;
-  color: var(--midnight-blue);
+  font-size: 0.875rem;
+  color: var(--dark-blue);
 }
 
 .toolbar-info li {
   margin-bottom: 0.5rem;
-  line-height: 1.4;
+  line-height: 1.6;
 }
 
 @media (max-width: 1024px) {

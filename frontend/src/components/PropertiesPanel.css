@@ -1,30 +1,36 @@
 .properties-panel {
-  width: 300px;
-  background-color: var(--white);
-  border-left: 1px solid var(--light-gray);
+  width: 320px;
+  background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+  border-left: 1px solid var(--medium-gray);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  box-shadow: var(--shadow-sm);
 }
 
 .properties-panel.empty {
   align-items: center;
   justify-content: center;
-  color: var(--dark-gray);
+  color: #666;
+  font-size: 0.95rem;
+  padding: 2rem;
+  text-align: center;
 }
 
 .panel-content {
-  padding: 1.5rem;
+  padding: 2rem 1.5rem;
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
 .properties-panel h2 {
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   color: var(--midnight-blue);
   margin: 0;
+  letter-spacing: -0.3px;
+  font-weight: 600;
 }
 
 .form-group {
@@ -46,24 +52,31 @@
 
 .form-group input,
 .form-group textarea {
-  padding: 0.75rem;
-  border: 1px solid var(--light-gray);
-  border-radius: 4px;
+  padding: 0.875rem;
+  border: 2px solid var(--medium-gray);
+  border-radius: 8px;
   font-size: 0.9rem;
   font-family: inherit;
   resize: vertical;
-  min-height: 60px;
+  min-height: 44px;
+  transition: all var(--transition-base);
+  background-color: #ffffff;
 }
 
 .form-group textarea {
-  min-height: 80px;
+  min-height: 100px;
 }
 
-.form-group input:focus-visible,
-.form-group textarea:focus-visible {
+.form-group input:hover,
+.form-group textarea:hover {
+  border-color: #b0b0b0;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
   border-color: var(--royal-blue);
-  outline: 2px solid var(--baby-blue);
-  outline-offset: -2px;
+  box-shadow: 0 0 0 3px rgba(24, 99, 214, 0.1);
+  outline: none;
 }
 
 .help-text {
@@ -74,21 +87,25 @@
 }
 
 .delete-button {
-  background-color: var(--dark-blue);
+  background: linear-gradient(135deg, var(--error) 0%, #dc2626 100%);
   color: var(--white);
-  padding: 0.75rem 1rem;
-  border-radius: 4px;
-  font-weight: 500;
+  padding: 0.875rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+  border: none;
 }
 
 .delete-button:hover {
-  background-color: var(--midnight-blue);
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .delete-button:focus-visible {
-  outline: 3px solid var(--baby-blue);
+  outline: 3px solid rgba(239, 68, 68, 0.3);
   outline-offset: 2px;
 }
 

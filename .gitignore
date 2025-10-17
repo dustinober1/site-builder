@@ -20,3 +20,4 @@ output-sites/*/
 .cache/
 .next/
 out/
+claude_code_zai_env.sh

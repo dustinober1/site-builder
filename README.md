@@ -1,6 +1,14 @@
-# E-Learning Site Builder - Proof of Concept
+# 🎓 E-Learning Site Builder
 
-A modern, accessible web application for creating 508-compliant e-learning training websites using drag-and-drop. The builder generates static HTML/CSS sites that can be hosted on any server.
+> A modern, accessible web application for creating 508-compliant e-learning training websites with drag-and-drop simplicity.
+
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/react-18.x-61dafb.svg)](https://reactjs.org/)
+
+## ✨ Overview
+
+Site Builder is a professional e-learning authoring tool that enables anyone to create beautiful, accessible training courses without coding knowledge. Generate static HTML/CSS sites that are WCAG 2.1 AA compliant and can be deployed anywhere.
 
 ## 🎯 Key Features
 
@@ -255,49 +263,60 @@ For production deployment:
 4. **CORS**: Configure CORS appropriately for your domain
 5. **Content Security Policy**: Implement CSP headers
 
-## 📋 Known Limitations
+## � Documentation
 
-- Currently supports single-level course structure (extensible)
-- Media uploads are stored locally (recommend cloud storage for production)
-- No built-in authentication (add for multi-user scenarios)
-- No backup/version control (recommend Git integration)
+- **[User Guide](docs/USER_GUIDE.md)** - Complete user manual
+- **[Developer Guide](docs/DEVELOPER_GUIDE.md)** - Technical documentation
+- **[Changelog](docs/CHANGELOG.md)** - Version history
 
-## 🛠️ Troubleshooting
+## 🛠️ Quick Troubleshooting
 
-### "Cannot GET /sites/course-name/index.html"
-- Ensure you've clicked "Export Site" button
-- Check that the backend is running on port 5000
-- Verify the project name matches
+| Issue | Solution |
+|-------|----------|
+| "Cannot GET /sites/..." | Click "Generate Site" button first |
+| Images not loading | Verify URL is publicly accessible |
+| Projects not saving | Check browser localStorage isn't full |
+| Port already in use | Kill process or use different port |
 
-### Images/Videos not loading
-- Check URL is publicly accessible
-- Verify file format is supported
-- Test URL in browser directly
+## 🗺️ Roadmap
 
-### Styling issues
-- Clear browser cache (Ctrl+Shift+Delete)
-- Check for CSS file in generated site directory
-- Verify file permissions (readable by web server)
+- [ ] Real-time collaboration
+- [ ] Template marketplace
+- [ ] AI-powered content suggestions
+- [ ] LMS integrations (Canvas, Moodle)
+- [ ] Analytics dashboard
+- [ ] Video editor integration
+- [ ] Multi-language support
+- [ ] Theme customization UI
 
 ## 🤝 Contributing
 
-To extend this POC:
-
-1. Add new content block types
-2. Implement multi-page editor
-3. Add image optimization
-4. Create theme system
-5. Build user authentication
-6. Add database backend
+We welcome contributions! Please see our [Developer Guide](docs/DEVELOPER_GUIDE.md) for details on:
+- Setting up development environment
+- Code style guidelines
+- Adding new features
+- Submitting pull requests
 
 ## 📄 License
 
-This proof of concept is provided as-is for demonstration purposes.
+MIT License - See [LICENSE](LICENSE) file for details
 
-## 📞 Support
+## � Support
 
-For issues or questions, check the troubleshooting section or review the component documentation in the code.
+- 📖 [Documentation](docs/)
+- 🐛 [Report Issues](https://github.com/yourusername/site-builder/issues)
+- 💡 [Request Features](https://github.com/yourusername/site-builder/issues/new)
+
+## 🙏 Acknowledgments
+
+Built with accessibility-first principles to ensure inclusive e-learning experiences for all users.
 
 ---
 
-**Built with accessibility-first principles** ♿✨
+<div align="center">
+
+**Made with ❤️ for accessible education**
+
+[⬆ back to top](#-e-learning-site-builder)
+
+</div>
