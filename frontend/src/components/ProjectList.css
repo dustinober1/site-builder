@@ -1,0 +1,173 @@
+.project-list {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.project-header {
+  background-color: #2c3e50;
+  color: white;
+  padding: 2rem 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.project-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.project-header h1 {
+  color: white;
+  margin-bottom: 0;
+  font-size: 2rem;
+}
+
+.back-button {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  background-color: #95a5a6;
+  color: white;
+  padding: 0.5rem 1rem;
+}
+
+.back-button:hover {
+  background-color: #7f8c8d;
+}
+
+.project-main {
+  flex: 1;
+  padding: 2rem;
+}
+
+.create-button {
+  display: block;
+  margin: 0 auto 2rem;
+  background-color: #27ae60;
+  color: white;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  border-radius: 4px;
+}
+
+.create-button:hover {
+  background-color: #229954;
+}
+
+.project-form {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  max-width: 500px;
+  margin: 0 auto 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.project-form h2 {
+  margin-bottom: 1.5rem;
+  color: #2c3e50;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #bdc3c7;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.submit-button {
+  background-color: #27ae60;
+  color: white;
+  padding: 0.75rem 1.5rem;
+}
+
+.submit-button:hover {
+  background-color: #229954;
+}
+
+.cancel-button {
+  background-color: #95a5a6;
+  color: white;
+  padding: 0.75rem 1.5rem;
+}
+
+.cancel-button:hover {
+  background-color: #7f8c8d;
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.project-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.project-card h3 {
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+  font-size: 1.3rem;
+}
+
+.project-date {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  flex-grow: 1;
+}
+
+.open-button {
+  background-color: #3498db;
+  color: white;
+  padding: 0.75rem;
+}
+
+.open-button:hover {
+  background-color: #2980b9;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #7f8c8d;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .back-button {
+    position: static;
+    display: block;
+    margin-top: 1rem;
+  }
+
+  .projects-grid {
+    grid-template-columns: 1fr;
+  }
+}

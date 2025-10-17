@@ -1,0 +1,126 @@
+.content-block {
+  background: white;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-block:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #bdc3c7;
+}
+
+.content-block:focus {
+  outline: 2px solid #3498db;
+  outline-offset: 2px;
+}
+
+.content-block.selected {
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+  background-color: #f0f8ff;
+}
+
+.block-preview {
+  padding: 1.5rem;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.block-preview p {
+  margin: 0;
+  color: #555;
+  line-height: 1.6;
+}
+
+.block-preview h2 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.3rem;
+}
+
+.preview-image,
+.preview-video {
+  width: 100%;
+  text-align: center;
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+}
+
+.block-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  background-color: #f5f5f5;
+  border-top: 1px solid #eee;
+}
+
+.controls-left {
+  display: flex;
+  gap: 1rem;
+}
+
+.block-type {
+  display: inline-block;
+  background-color: #e8f4f8;
+  color: #2c3e50;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.controls-right {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.control-btn {
+  background-color: #ecf0f1;
+  color: #2c3e50;
+  border: none;
+  border-radius: 4px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.control-btn:hover {
+  background-color: #bdc3c7;
+}
+
+.control-btn:focus {
+  outline: 2px solid #3498db;
+  outline-offset: 1px;
+}
+
+.control-btn.delete-btn {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.control-btn.delete-btn:hover {
+  background-color: #c0392b;
+}
+
+@media (max-width: 768px) {
+  .block-controls {
+    flex-wrap: wrap;
+  }
+
+  .content-block {
+    margin-bottom: 0.5rem;
+  }
+}

@@ -1,0 +1,65 @@
+import React, { useState, useCallback } from 'react';
+import './App.css';
+import Editor from './components/Editor';
+import ProjectList from './components/ProjectList';
+import WelcomeScreen from './components/WelcomeScreen';
+
+function App() {
+  const [currentView, setCurrentView] = useState('welcome'); // welcome, projects, editor
+  const [currentProject, setCurrentProject] = useState(null);
+
+  const handleCreateProject = useCallback((projectName) => {
+    const newProject = {
+      id: Date.now(),
+      name: projectName,
+      pages: [
+        {
+          id: 1,
+          title: 'Welcome',
+          slug: 'welcome',
+          content: []
+        }
+      ],
+      createdAt: new Date().toISOString()
+    };
+    setCurrentProject(newProject);
+    setCurrentView('editor');
+  }, []);
+
+  const handleOpenProject = useCallback((project) => {
+    setCurrentProject(project);
+    setCurrentView('editor');
+  }, []);
+
+  const handleBackToProjects = useCallback(() => {
+    setCurrentView('projects');
+  }, []);
+
+  const handleBackToWelcome = useCallback(() => {
+    setCurrentView('welcome');
+    setCurrentProject(null);
+  }, []);
+
+  return (
+    <div className="app">
+      {currentView === 'welcome' && (
+        <WelcomeScreen onGetStarted={() => setCurrentView('projects')} />
+      )}
+      {currentView === 'projects' && (
+        <ProjectList 
+          onCreateProject={handleCreateProject}
+          onOpenProject={handleOpenProject}
+          onBack={handleBackToWelcome}
+        />
+      )}
+      {currentView === 'editor' && currentProject && (
+        <Editor 
+          project={currentProject}
+          onBack={handleBackToProjects}
+        />
+      )}
+    </div>
+  );
+}
+
+export default App;
