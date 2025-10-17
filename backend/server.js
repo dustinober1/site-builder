@@ -380,7 +380,7 @@ html {
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   line-height: 1.6;
-  color: #333;
+  color: #001f3d;
   background-color: #f9f9f9;
   min-height: 100vh;
   display: flex;
@@ -389,7 +389,7 @@ body {
 
 /* Improved contrast for readability */
 header {
-  background-color: #2c3e50;
+  background-color: #001f3d;
   color: white;
   padding: 2rem 1rem;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -402,7 +402,7 @@ header h1 {
 }
 
 nav {
-  background-color: #34495e;
+  background-color: #151983;
   padding: 0.5rem 0;
 }
 
@@ -430,12 +430,12 @@ nav a {
 
 nav a:hover,
 nav a:focus {
-  background-color: #3498db;
+  background-color: #1863d6;
   text-decoration: underline;
 }
 
 nav a:focus-visible {
-  outline: 3px solid #fff;
+  outline: 3px solid #b6cbe1;
   outline-offset: 2px;
 }
 
@@ -449,21 +449,21 @@ main {
 
 main h1 {
   margin-bottom: 2rem;
-  color: #2c3e50;
+  color: #001f3d;
   font-size: 2.5rem;
   font-weight: 700;
 }
 
 main h2 {
   margin: 1.5rem 0 1rem 0;
-  color: #34495e;
+  color: #151983;
   font-size: 1.8rem;
   font-weight: 600;
 }
 
 main h3 {
   margin: 1.2rem 0 0.8rem 0;
-  color: #34495e;
+  color: #151983;
   font-size: 1.4rem;
   font-weight: 600;
 }
@@ -474,7 +474,7 @@ main h3 {
   background: white;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  border-left: 4px solid #3498db;
+  border-left: 4px solid #1863d6;
 }
 
 .text-block p {
@@ -488,7 +488,7 @@ main h3 {
 }
 
 .heading-block h2 {
-  color: #2c3e50;
+  color: #001f3d;
   font-size: 1.5rem;
   font-weight: 600;
 }
@@ -504,13 +504,13 @@ main h3 {
   border-radius: 8px;
   display: block;
   margin: 0 auto;
-  border: 1px solid #bdc3c7;
+  border: 1px solid #b6cbe1;
 }
 
 .image-block figcaption {
   margin-top: 1rem;
   font-style: italic;
-  color: #666;
+  color: #333333;
   font-size: 0.95rem;
 }
 
@@ -524,11 +524,11 @@ main h3 {
   border-radius: 8px;
   max-width: 100%;
   height: auto;
-  border: 1px solid #bdc3c7;
+  border: 1px solid #b6cbe1;
 }
 
 footer {
-  background-color: #2c3e50;
+  background-color: #001f3d;
   color: white;
   text-align: center;
   padding: 2rem 1rem;
@@ -541,7 +541,7 @@ footer p {
 
 /* Accessibility improvements */
 :focus-visible {
-  outline: 3px solid #3498db;
+  outline: 3px solid #1863d6;
   outline-offset: 2px;
 }
 

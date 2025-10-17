@@ -1,6 +1,6 @@
 .content-block {
-  background: white;
-  border: 2px solid #ddd;
+  background: var(--white);
+  border: 2px solid var(--light-gray);
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
@@ -11,18 +11,18 @@
 
 .content-block:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-color: #bdc3c7;
+  border-color: var(--royal-blue);
 }
 
-.content-block:focus {
-  outline: 2px solid #3498db;
+.content-block:focus-visible {
+  outline: 2px solid var(--royal-blue);
   outline-offset: 2px;
 }
 
 .content-block.selected {
-  border-color: #3498db;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-  background-color: #f0f8ff;
+  border-color: var(--royal-blue);
+  box-shadow: 0 0 0 3px rgba(24, 99, 214, 0.1);
+  background-color: var(--baby-blue);
 }
 
 .block-preview {
@@ -35,13 +35,13 @@
 
 .block-preview p {
   margin: 0;
-  color: #555;
+  color: var(--midnight-blue);
   line-height: 1.6;
 }
 
 .block-preview h2 {
   margin: 0;
-  color: #2c3e50;
+  color: var(--midnight-blue);
   font-size: 1.3rem;
 }
 
@@ -49,10 +49,10 @@
 .preview-video {
   width: 100%;
   text-align: center;
-  color: #7f8c8d;
+  color: var(--dark-gray);
   font-size: 0.9rem;
   padding: 1rem;
-  background-color: #f9f9f9;
+  background-color: var(--light-gray);
   border-radius: 4px;
 }
 
@@ -61,8 +61,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 1.5rem;
-  background-color: #f5f5f5;
-  border-top: 1px solid #eee;
+  background-color: var(--light-gray);
+  border-top: 1px solid var(--light-gray);
 }
 
 .controls-left {
@@ -72,8 +72,8 @@
 
 .block-type {
   display: inline-block;
-  background-color: #e8f4f8;
-  color: #2c3e50;
+  background-color: var(--baby-blue);
+  color: var(--midnight-blue);
   padding: 0.25rem 0.75rem;
   border-radius: 4px;
   font-size: 0.75rem;
@@ -87,8 +87,8 @@
 }
 
 .control-btn {
-  background-color: #ecf0f1;
-  color: #2c3e50;
+  background-color: var(--light-gray);
+  color: var(--midnight-blue);
   border: none;
   border-radius: 4px;
   padding: 0.4rem 0.8rem;
@@ -98,21 +98,21 @@
 }
 
 .control-btn:hover {
-  background-color: #bdc3c7;
+  background-color: var(--dark-gray);
 }
 
-.control-btn:focus {
-  outline: 2px solid #3498db;
+.control-btn:focus-visible {
+  outline: 2px solid var(--royal-blue);
   outline-offset: 1px;
 }
 
 .control-btn.delete-btn {
-  background-color: #e74c3c;
-  color: white;
+  background-color: var(--dark-blue);
+  color: var(--white);
 }
 
 .control-btn.delete-btn:hover {
-  background-color: #c0392b;
+  background-color: var(--midnight-blue);
 }
 
 @media (max-width: 768px) {

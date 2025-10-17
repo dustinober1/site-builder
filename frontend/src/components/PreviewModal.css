@@ -22,7 +22,7 @@
 }
 
 .preview-modal {
-  background-color: white;
+  background-color: var(--white);
   border-radius: 8px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
   display: flex;
@@ -50,13 +50,13 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 2px solid #ecf0f1;
-  background-color: #f8f9fa;
+  border-bottom: 2px solid var(--light-gray);
+  background-color: var(--midnight-blue);
 }
 
 .preview-header h2 {
   margin: 0;
-  color: #2c3e50;
+  color: var(--white);
   font-size: 1.3rem;
 }
 
@@ -65,17 +65,17 @@
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #666;
+  color: var(--white);
   padding: 0.5rem;
   border-radius: 4px;
   transition: all 0.2s;
 }
 
 .close-button:hover,
-.close-button:focus {
-  background-color: #e8e8e8;
-  color: #333;
-  outline: 2px solid #3498db;
+.close-button:focus-visible {
+  background-color: var(--dark-blue);
+  color: var(--white);
+  outline: 2px solid var(--baby-blue);
   outline-offset: 2px;
 }
 
@@ -84,16 +84,16 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  background-color: #ecf0f1;
-  border-bottom: 1px solid #bdc3c7;
+  background-color: var(--light-gray);
+  border-bottom: 1px solid var(--dark-gray);
   gap: 1rem;
 }
 
 .preview-controls button {
   padding: 0.6rem 1.2rem;
-  background-color: #3498db;
-  color: white;
-  border: none;
+  background-color: var(--royal-blue);
+  color: var(--white);
+  border: 2px solid transparent;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.95rem;
@@ -101,24 +101,25 @@
 }
 
 .preview-controls button:hover:not(:disabled) {
-  background-color: #2980b9;
+  background-color: var(--dark-blue);
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-color: var(--baby-blue);
 }
 
 .preview-controls button:focus-visible {
-  outline: 2px solid #2c3e50;
+  outline: 3px solid var(--baby-blue);
   outline-offset: 2px;
 }
 
 .preview-controls button:disabled {
-  background-color: #bdc3c7;
+  background-color: var(--dark-gray);
   cursor: not-allowed;
   opacity: 0.6;
 }
 
 .page-counter {
-  color: #2c3e50;
+  color: var(--midnight-blue);
   font-weight: 600;
   flex: 1;
   text-align: center;
@@ -138,10 +139,10 @@
 
 .preview-footer {
   padding: 1rem;
-  background-color: #f8f9fa;
-  border-top: 1px solid #ecf0f1;
+  background-color: var(--light-gray);
+  border-top: 1px solid var(--dark-gray);
   text-align: center;
-  color: #666;
+  color: var(--midnight-blue);
   font-size: 0.9rem;
 }
 
