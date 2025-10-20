@@ -4,6 +4,9 @@ import Canvas from './Canvas';
 import Toolbar from './Toolbar';
 import PropertiesPanel from './PropertiesPanel';
 import PreviewModal from './PreviewModal';
+import ProgressTracker from './ProgressTracker';
+import LearningPath from './LearningPath';
+import AnalyticsDashboard from './AnalyticsDashboard';
 import { autoSaveProject, saveProject } from '../utils/projectStorage';
 import axios from 'axios';
 
@@ -17,6 +20,7 @@ function Editor({ project, onBack }) {
   const [message, setMessage] = useState('');
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState('');
+  const [activeTab, setActiveTab] = useState('properties');
 
   // Auto-save project when blocks change
   useEffect(() => {
@@ -56,10 +60,54 @@ function Editor({ project, onBack }) {
         newBlock = {
           ...newBlock,
           question: 'Enter question here',
+          questionType: 'multiple-choice', // Default to multiple choice
           options: ['Option 1', 'Option 2', 'Option 3', 'Option 4'],
           correctAnswer: 0,
-          feedback: ''
+          feedback: '',
+          correctFeedback: 'Correct!',
+          incorrectFeedback: 'Please try again.'
         };
+        break;
+      case 'drag-and-drop':
+        newBlock = {
+          ...newBlock,
+          question: 'Drag the items to the correct targets',
+          questionType: 'drag-and-drop',
+          items: [
+            { id: 'item1', content: 'Item 1' },
+            { id: 'item2', content: 'Item 2' },
+            { id: 'item3', content: 'Item 3' }
+          ],
+          targets: [
+            { id: 'target1', label: 'Target 1' },
+            { id: 'target2', label: 'Target 2' },
+            { id: 'target3', label: 'Target 3' }
+          ],
+          correctMapping: {
+            'target1': 'item1',
+            'target2': 'item2',
+            'target3': 'item3'
+          },
+          correctFeedback: 'Perfect! All items matched correctly.',
+          incorrectFeedback: 'Some matches need correction.'
+        };
+        break;
+      case 'hotspot':
+        newBlock = {
+          ...newBlock,
+          question: 'Click on the correct area in the image',
+          questionType: 'hotspot',
+          imageUrl: '',
+          alt: 'Interactive image',
+          hotspots: [
+            { id: 'hotspot1', top: 20, left: 30, width: 15, height: 15 },
+            { id: 'hotspot2', top: 50, left: 60, width: 15, height: 15 }
+          ],
+          correctHotspot: 'hotspot1',
+          correctFeedback: 'Correct! You identified the right area.',
+          incorrectFeedback: 'Incorrect. Please try again.'
+        };
+        break;
         break;
       case 'advanced-question':
         newBlock = {
@@ -183,18 +231,63 @@ function Editor({ project, onBack }) {
 
       <div className="editor-content">
         <Toolbar onAddBlock={handleAddBlock} />
-        <Canvas
-          blocks={blocks}
-          selectedBlockId={selectedBlockId}
-          onSelectBlock={setSelectedBlockId}
-          onDeleteBlock={handleDeleteBlock}
-          onMoveBlock={handleMoveBlock}
-        />
-        <PropertiesPanel
-          block={selectedBlock}
-          onUpdateBlock={handleUpdateBlock}
-          onDelete={handleDeleteBlock}
-        />
+        <div className="main-content-area">
+          <div className="canvas-and-tracker">
+            <ProgressTracker 
+              project={project} 
+              currentPage={currentPage} 
+              blocks={blocks} 
+              onBlockChange={setBlocks}
+            />
+            <Canvas
+              blocks={blocks}
+              selectedBlockId={selectedBlockId}
+              onSelectBlock={setSelectedBlockId}
+              onDeleteBlock={handleDeleteBlock}
+              onMoveBlock={handleMoveBlock}
+            />
+          </div>
+          <div className="sidebar-panel">
+            <LearningPath
+              project={project}
+              currentPage={currentPage}
+              blocks={blocks}
+              onNavigate={(page) => {
+                setCurrentPage(page);
+                setBlocks(page.content || []);
+              }}
+            />
+            <div className="panel-tabs">
+              <button 
+                className={`tab-button ${activeTab === 'properties' ? 'active' : ''}`}
+                onClick={() => setActiveTab('properties')}
+              >
+                Properties
+              </button>
+              <button 
+                className={`tab-button ${activeTab === 'analytics' ? 'active' : ''}`}
+                onClick={() => setActiveTab('analytics')}
+              >
+                Analytics
+              </button>
+            </div>
+            <div className="panel-content">
+              {activeTab === 'properties' && (
+                <PropertiesPanel
+                  block={selectedBlock}
+                  onUpdateBlock={handleUpdateBlock}
+                  onDelete={handleDeleteBlock}
+                />
+              )}
+              {activeTab === 'analytics' && (
+                <AnalyticsDashboard
+                  project={project}
+                  blocks={blocks}
+                />
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
       <PreviewModal

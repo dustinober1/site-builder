@@ -1,6 +1,6 @@
 /**
- * SCORM 1.2 and 2004 Compliance Module
- * Provides utilities to generate SCORM-compliant manifests and content
+ * SCORM 1.2, 2004 and xAPI Compliance Module
+ * Provides utilities to generate SCORM-compliant manifests and content with xAPI support
  */
 
 const fs = require('fs');
@@ -320,10 +320,87 @@ function generateSCORMAPI() {
   window.API = SCORMApi;
   window.API_1484_11 = SCORMApi; // SCORM 2004
 
+  // xAPI functionality
+  const xAPI = {
+    initialized: false,
+    
+    // Initialize xAPI
+    initialize: function() {
+      this.initialized = true;
+      console.log('xAPI initialized');
+      return true;
+    },
+    
+    // Send statement to LRS
+    sendStatement: function(verb, object, result = null) {
+      if (!this.initialized) {
+        console.error('xAPI not initialized');
+        return false;
+      }
+      
+      const statement = {
+        actor: {
+          mbox: 'mailto:learner@example.com', // This would come from the LMS
+          name: 'Learner',
+          objectType: 'Agent'
+        },
+        verb: {
+          id: verb.id || 'http://adlnet.gov/expapi/verbs/answered',
+          display: {
+            'en-US': verb.display || 'answered'
+          }
+        },
+        object: object,
+        timestamp: new Date().toISOString(),
+        result: result
+      };
+      
+      // In a real implementation, this would send to an LRS
+      // For now, we'll just log it
+      console.log('xAPI Statement:', statement);
+      
+      // Would normally make an HTTP request to an LRS endpoint
+      // fetch('/xapi/statements', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     'Authorization': 'Basic ' + btoa('username:password')
+      //   },
+      //   body: JSON.stringify(statement)
+      // });
+      
+      return true;
+    }
+  };
+
+  // Initialize xAPI when page loads
+  window.addEventListener('load', function() {
+    xAPI.initialize();
+  });
+
   // Track page completion
   window.addEventListener('beforeunload', function() {
     if (SCORMApi.initialized) {
       SCORMApi.SetValue('cmi.core.exit', 'suspend');
+    }
+    
+    // Send xAPI statement for page completion
+    if (xAPI.initialized) {
+      xAPI.sendStatement(
+        { id: 'http://adlnet.gov/expapi/verbs/terminated', display: 'terminated' },
+        { 
+          id: window.location.href,
+          definition: {
+            name: {
+              'en-US': document.title
+            },
+            description: {
+              'en-US': 'A page in the course'
+            },
+            type: 'http://adlnet.gov/expapi/activities/page'
+          }
+        }
+      );
     }
   });
 
@@ -387,10 +464,41 @@ function escapeXml(str) {
     .replace(/'/g, '&apos;');
 }
 
+/**
+ * Generate xAPI statement for learning activities
+ */
+function generateXAPIStatement(verb, object, result = null) {
+  return {
+    actor: {
+      mbox: 'mailto:learner@example.com', // Would be provided by LMS
+      name: 'Learner',
+      objectType: 'Agent'
+    },
+    verb: {
+      id: verb.id,
+      display: {
+        'en-US': verb.display
+      }
+    },
+    object: object,
+    timestamp: new Date().toISOString(),
+    result: result
+  };
+}
+
+/**
+ * Generate xAPI API for content
+ */
+function generateXAPIAPI() {
+  return `/**\n * xAPI Runtime API\n * Provides communication between content and Learning Record Store (LRS)\n */\n\n(function(window) {\n  'use strict';\n\n  // xAPI API Object\n  const xAPI = {\n    initialized: false,\n    lrsEndpoint: '', // This would be configured by the LMS\n    \n    initialize: function(lrsEndpoint) {\n      this.lrsEndpoint = lrsEndpoint || '';\n      this.initialized = true;\n      console.log('xAPI API Initialized');\n      return true;\n    },\n    \n    sendStatement: function(statement) {\n      if (!this.initialized) {\n        console.error('xAPI not initialized');\n        return false;\n      }\n      \n      // Add authentication headers in a real implementation\n      fetch(this.lrsEndpoint + '/statements', {\n        method: 'POST',\n        headers: {\n          'Content-Type': 'application/json',\n          'X-Experience-API-Version': '1.0.3',\n          // 'Authorization': 'Basic ' + btoa('username:password') // Would be provided by LMS\n        },\n        body: JSON.stringify(statement)\n      })\n      .then(response => {\n        if (response.ok) {\n          console.log('Statement sent successfully');\n        } else {\n          console.error('Failed to send statement:', response.status);\n        }\n      })\n      .catch(error => {\n        console.error('Error sending statement:', error);\n      });\n      \n      return true;\n    },\n    \n    // Convenience methods for common statements\n    sendCompleted: function(activityId, activityName) {\n      const statement = {\n        actor: {\n          mbox: 'mailto:learner@example.com',\n          name: 'Learner',\n          objectType: 'Agent'\n        },\n        verb: {\n          id: 'http://adlnet.gov/expapi/verbs/completed',\n          display: { 'en-US': 'completed' }\n        },\n        object: {\n          id: activityId,\n          definition: {\n            name: { 'en-US': activityName },\n            type: 'http://adlnet.gov/expapi/activities/lesson'\n          }\n        },\n        result: {\n          completion: true\n        }\n      };\n      \n      return this.sendStatement(statement);\n    },\n    \n    sendScored: function(activityId, activityName, score, maxScore) {\n      const statement = {\n        actor: {\n          mbox: 'mailto:learner@example.com',\n          name: 'Learner',\n          objectType: 'Agent'\n        },\n        verb: {\n          id: 'http://adlnet.gov/expapi/verbs/scored',\n          display: { 'en-US': 'scored' }\n        },\n        object: {\n          id: activityId,\n          definition: {\n            name: { 'en-US': activityName },\n            type: 'http://adlnet.gov/expapi/activities/assessment'\n          }\n        },\n        result: {\n          score: {\n            raw: score,\n            min: 0,\n            max: maxScore,\n            scaled: score / maxScore\n          }\n        }\n      };\n      \n      return this.sendStatement(statement);\n    }\n  };\n  \n  // Expose globally\n  window.xAPI = xAPI;\n  \n  // Initialize on page load\n  window.addEventListener('load', function() {\n    // In a real implementation, the LRS endpoint would be provided by the LMS\n    // xAPI.initialize('https://your-lrs-endpoint.com');\n  });\n  \n})(window);\n`;
+}
+
 module.exports = {
   generateSCORM12Manifest,
   generateSCORM2004Manifest,
   generateSCORMAPI,
   generateSCORMWrapper,
+  generateXAPIAPI,
+  generateXAPIStatement,
   escapeXml,
 };

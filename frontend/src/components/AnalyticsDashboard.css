@@ -1,0 +1,144 @@
+.analytics-dashboard {
+  background-color: white;
+  border: 1px solid #e0e5ff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.dashboard-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e0e5ff;
+}
+
+.dashboard-header h2 {
+  margin: 0 0 0.5rem 0;
+  color: #001f3d;
+  font-size: 1.5rem;
+}
+
+.dashboard-header p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.metric-card {
+  background: linear-gradient(135deg, #f0f4ff 0%, #e6ecff 100%);
+  border: 1px solid #d0d8ff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.metric-value {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1863d6;
+  margin-bottom: 0.5rem;
+}
+
+.metric-label {
+  font-size: 0.9rem;
+  color: #001f3d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detailed-analytics h3,
+.recommendations h3 {
+  margin: 1.5rem 0 1rem 0;
+  color: #001f3d;
+  font-size: 1.2rem;
+  border-bottom: 1px solid #e0e5ff;
+  padding-bottom: 0.5rem;
+}
+
+.assessment-list {
+  margin: 1rem 0;
+}
+
+.assessment-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid #e0e5ff;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.assessment-info {
+  flex: 1;
+}
+
+.assessment-question {
+  font-weight: 500;
+  color: #001f3d;
+  margin-bottom: 0.25rem;
+}
+
+.assessment-type {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.assessment-stats {
+  flex-shrink: 0;
+}
+
+.status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.status.completed {
+  background-color: #e6f4ea;
+  color: #0a7e3a;
+}
+
+.status.pending {
+  background-color: #f0f4ff;
+  color: #1863d6;
+}
+
+.recommendations ul {
+  list-style: none;
+  padding: 0;
+}
+
+.recommendations li {
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background-color: #f8f9ff;
+  border-left: 3px solid #1863d6;
+  border-radius: 0 4px 4px 0;
+}
+
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .assessment-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .assessment-stats {
+    align-self: flex-end;
+  }
+}

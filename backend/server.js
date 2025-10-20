@@ -379,14 +379,78 @@ app.post('/api/generate/scorm-2004', (req, res) => {
   }
 });
 
+// Generate xAPI package
+app.post('/api/generate/xapi', (req, res) => {
+  try {
+    const { projectName, pages } = req.body;
+    
+    if (!projectName || !pages) {
+      return res.status(400).json({ error: 'Missing projectName or pages' });
+    }
+
+    const outputDir = path.join(process.env.OUTPUT_DIR || '../output-sites', `${projectName}-xapi`);
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
+
+    // Create js directory for xAPI API
+    const jsDir = path.join(outputDir, 'js');
+    if (!fs.existsSync(jsDir)) {
+      fs.mkdirSync(jsDir, { recursive: true });
+    }
+
+    // Generate xAPI API
+    const xapiApi = scormCompliance.generateXAPIAPI();
+    fs.writeFileSync(path.join(jsDir, 'xapi-api.js'), xapiApi);
+
+    // Generate pages with xAPI integration
+    pages.forEach((page, index) => {
+      const htmlContent = generateHTML(page, projectName, pages);
+      const filename = page.slug || `page-${index}`;
+      fs.writeFileSync(
+        path.join(outputDir, `${filename}.html`),
+        htmlContent
+      );
+    });
+
+    // Generate index page
+    const indexContent = generateIndex(pages, projectName);
+    fs.writeFileSync(
+      path.join(outputDir, 'index.html'),
+      indexContent
+    );
+
+    // Copy CSS
+    const cssContent = generateCSS();
+    fs.writeFileSync(
+      path.join(outputDir, 'styles.css'),
+      cssContent
+    );
+
+    res.json({
+      success: true,
+      message: 'xAPI package generated successfully',
+      path: `/sites/${projectName}-xapi/index.html`,
+      directory: outputDir,
+      xapiVersion: '1.0.3'
+    });
+  } catch (error) {
+    console.error('Error generating xAPI package:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Helper function to generate HTML
-function generateHTML(page, projectName) {
+function generateHTML(page, projectName, allPages = []) {
   const content = page.content || [];
   
   let contentHTML = '';
   content.forEach(block => {
     contentHTML += generateContentBlock(block);
   });
+  
+  // Generate navigation with prerequisites
+  const navigationHTML = generateNavigation(page, allPages);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -396,6 +460,26 @@ function generateHTML(page, projectName) {
   <meta name="description" content="${escapeHtml(page.title)} - Course material">
   <title>${escapeHtml(page.title)}</title>
   <link rel="stylesheet" href="styles.css">
+  <script>
+    // Learning path functionality
+    function checkPrerequisites(pageId, prereqIds) {
+      // In a real implementation, you would check if prerequisites are completed
+      // For now, we'll just return true to allow navigation
+      return true;
+    }
+    
+    function navigateToPage(url, prereqIds) {
+      if (prereqIds && prereqIds.length > 0) {
+        if (checkPrerequisites(url, prereqIds)) {
+          window.location.href = url;
+        } else {
+          alert('You must complete the prerequisite pages first.');
+        }
+      } else {
+        window.location.href = url;
+      }
+    }
+  </script>
 </head>
 <body>
   <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -411,19 +495,144 @@ function generateHTML(page, projectName) {
   <main id="main-content" role="main">
     <h1>${escapeHtml(page.title)}</h1>
     ${contentHTML}
+    ${navigationHTML}
   </main>
 
   <footer role="contentinfo">
     <p>&copy; 2025 ${escapeHtml(projectName)}. All rights reserved.</p>
   </footer>
+  
+  <!-- xAPI Integration -->
+  <script src="js/xapi-api.js"></script>
+  <script>
+    // Track page viewed
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.xAPI && window.xAPI.initialized) {
+        window.xAPI.sendStatement({
+          actor: {
+            mbox: 'mailto:learner@example.com',
+            name: 'Learner',
+            objectType: 'Agent'
+          },
+          verb: {
+            id: 'http://adlnet.gov/expapi/verbs/attempted',
+            display: { 'en-US': 'attempted' }
+          },
+          object: {
+            id: window.location.href,
+            definition: {
+              name: { 'en-US': '${escapeHtml(page.title)}' },
+              description: { 'en-US': 'A page in the ${escapeHtml(projectName)} course' },
+              type: 'http://adlnet.gov/expapi/activities/lesson'
+            }
+          }
+        });
+      }
+    });
+    
+    // Track assessment interactions
+    function trackAssessmentInteraction(assessmentId, response, success = null) {
+      if (window.xAPI && window.xAPI.initialized) {
+        const statement = {
+          actor: {
+            mbox: 'mailto:learner@example.com',
+            name: 'Learner',
+            objectType: 'Agent'
+          },
+          verb: {
+            id: 'http://adlnet.gov/expapi/verbs/answered',
+            display: { 'en-US': 'answered' }
+          },
+          object: {
+            id: assessmentId,
+            definition: {
+              name: { 'en-US': 'Assessment ' + assessmentId },
+              type: 'http://adlnet.gov/expapi/activities/cmi.interaction'
+            }
+          },
+          result: {
+            response: response
+          }
+        };
+        
+        if (success !== null) {
+          statement.result.success = success;
+        }
+        
+        window.xAPI.sendStatement(statement);
+      }
+    }
+    
+    // Track completion
+    window.addEventListener('beforeunload', function() {
+      if (window.xAPI && window.xAPI.initialized) {
+        window.xAPI.sendStatement({
+          actor: {
+            mbox: 'mailto:learner@example.com',
+            name: 'Learner',
+            objectType: 'Agent'
+          },
+          verb: {
+            id: 'http://adlnet.gov/expapi/verbs/terminated',
+            display: { 'en-US': 'terminated' }
+          },
+          object: {
+            id: window.location.href,
+            definition: {
+              name: { 'en-US': '${escapeHtml(page.title)}' },
+              type: 'http://adlnet.gov/expapi/activities/lesson'
+            }
+          }
+        });
+      }
+    });
+  </script>
 </body>
 </html>`;
+}
+
+function generateNavigation(currentPage, allPages) {
+  if (!allPages || allPages.length <= 1) {
+    return '';
+  }
+  
+  const currentIndex = allPages.findIndex(p => p.id === currentPage.id);
+  const prevPage = currentIndex > 0 ? allPages[currentIndex - 1] : null;
+  const nextPage = currentIndex < allPages.length - 1 ? allPages[currentIndex + 1] : null;
+  
+  let navHTML = '<nav class="page-navigation" aria-label="Page navigation">';
+  navHTML += '<ul>';
+  
+  if (prevPage) {
+    navHTML += `<li><a class="nav-link prev" href="${prevPage.slug || 'page-' + (currentIndex - 1)}.html">← Previous: ${escapeHtml(prevPage.title)}</a></li>`;
+  }
+  
+  // Add table of contents
+  navHTML += '<li class="toc"><h3>Course Contents</h3><ul class="toc-list">';
+  allPages.forEach((page, index) => {
+    const isCurrent = page.id === currentPage.id;
+    const pageLink = page.slug || `page-${index}`;
+    navHTML += `<li class="${isCurrent ? 'current' : ''}"><a href="${pageLink}.html">${index + 1}. ${escapeHtml(page.title)}</a></li>`;
+  });
+  navHTML += '</ul></li>';
+  
+  if (nextPage) {
+    navHTML += `<li><a class="nav-link next" href="${nextPage.slug || 'page-' + (currentIndex + 1)}.html">Next: ${escapeHtml(nextPage.title)} →</a></li>`;
+  }
+  
+  navHTML += '</ul>';
+  navHTML += '</nav>';
+  
+  return navHTML;
 }
 
 function generateIndex(pages, projectName) {
   let pageLinks = pages.map((page, idx) => 
     `<li><a href="${page.slug || `page-${idx}`}.html">${escapeHtml(page.title)}</a></li>`
   ).join('\n');
+
+  // Generate navigation for index page too
+  const navigationHTML = generateNavigation({ id: 'index', title: 'Home', slug: 'index' }, pages);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -433,6 +642,26 @@ function generateIndex(pages, projectName) {
   <meta name="description" content="Home page for ${escapeHtml(projectName)} course">
   <title>${escapeHtml(projectName)} - Home</title>
   <link rel="stylesheet" href="styles.css">
+  <script>
+    // Learning path functionality
+    function checkPrerequisites(pageId, prereqIds) {
+      // In a real implementation, you would check if prerequisites are completed
+      // For now, we'll just return true to allow navigation
+      return true;
+    }
+    
+    function navigateToPage(url, prereqIds) {
+      if (prereqIds && prereqIds.length > 0) {
+        if (checkPrerequisites(url, prereqIds)) {
+          window.location.href = url;
+        } else {
+          alert('You must complete the prerequisite pages first.');
+        }
+      } else {
+        window.location.href = url;
+      }
+    }
+  </script>
 </head>
 <body>
   <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -458,6 +687,8 @@ function generateIndex(pages, projectName) {
         ${pageLinks}
       </ul>
     </section>
+    
+    ${navigationHTML}
   </main>
 
   <footer role="contentinfo">
@@ -498,9 +729,442 @@ function generateContentBlock(block) {
         ${title ? `<p><strong>${escapeHtml(title)}</strong></p>` : ''}
       </section>`;
     
+    case 'knowledge-check':
+      return generateAssessmentBlock(block);
+    
+    case 'drag-and-drop':
+      return generateDragAndDropBlock(block);
+    
+    case 'hotspot':
+      return generateHotspotBlock(block);
+    
     default:
       return '';
   }
+}
+
+function generateAssessmentBlock(block) {
+  const { question, questionType = 'multiple-choice', options, correctAnswer, feedback, correctFeedback, incorrectFeedback, items, choices } = block;
+  
+  // Escape HTML for security
+  const escapedQuestion = escapeHtml(question || '');
+  const escapedFeedback = escapeHtml(feedback || '');
+  const escapedCorrectFeedback = escapeHtml(correctFeedback || 'Correct!');
+  const escapedIncorrectFeedback = escapeHtml(incorrectFeedback || 'Please try again.');
+  
+  let assessmentHtml = '';
+  
+  switch(questionType) {
+    case 'multiple-choice':
+      assessmentHtml = `
+        <section class="content-block assessment-block" role="region" aria-label="Knowledge check">
+          <div class="assessment-header">
+            <h3>${escapedQuestion}</h3>
+            <span class="question-type">Multiple Choice</span>
+          </div>
+          <form class="assessment-form" onsubmit="handleAssessmentSubmit(event, ${JSON.stringify(correctAnswer).replace(/"/g, '&quot;')})">
+            <div class="assessment-options">
+              ${(options || []).map((opt, idx) => `
+                <div class="option-item">
+                  <label>
+                    <input type="radio" name="answer-${block.id}" value="${idx}" />
+                    <span>${escapeHtml(opt)}</span>
+                  </label>
+                </div>
+              `).join('')}
+            </div>
+            <button type="submit" class="submit-btn">Submit Answer</button>
+          </form>
+          <div class="feedback-container" style="display:none;">
+            <p class="feedback"></p>
+          </div>
+        </section>
+      `;
+      break;
+      
+    case 'true-false':
+      assessmentHtml = `
+        <section class="content-block assessment-block" role="region" aria-label="Knowledge check">
+          <div class="assessment-header">
+            <h3>${escapedQuestion}</h3>
+            <span class="question-type">True/False</span>
+          </div>
+          <form class="assessment-form" onsubmit="handleAssessmentSubmit(event, '${correctAnswer}')">
+            <div class="assessment-options">
+              <div class="option-item">
+                <label>
+                  <input type="radio" name="answer-${block.id}" value="true" />
+                  <span>True</span>
+                </label>
+              </div>
+              <div class="option-item">
+                <label>
+                  <input type="radio" name="answer-${block.id}" value="false" />
+                  <span>False</span>
+                </label>
+              </div>
+            </div>
+            <button type="submit" class="submit-btn">Submit Answer</button>
+          </form>
+          <div class="feedback-container" style="display:none;">
+            <p class="feedback"></p>
+          </div>
+        </section>
+      `;
+      break;
+      
+    case 'fill-in-the-blank':
+      assessmentHtml = `
+        <section class="content-block assessment-block" role="region" aria-label="Knowledge check">
+          <div class="assessment-header">
+            <h3>${escapedQuestion}</h3>
+            <span class="question-type">Fill in the Blank</span>
+          </div>
+          <form class="assessment-form" onsubmit="handleAssessmentSubmit(event, '${escapeHtml(correctAnswer || '')}')">
+            <div class="assessment-input">
+              <input type="text" id="answer-${block.id}" placeholder="Type your answer here..." />
+            </div>
+            <button type="submit" class="submit-btn">Submit Answer</button>
+          </form>
+          <div class="feedback-container" style="display:none;">
+            <p class="feedback"></p>
+          </div>
+        </section>
+      `;
+      break;
+      
+    case 'matching':
+      assessmentHtml = `
+        <section class="content-block assessment-block" role="region" aria-label="Knowledge check">
+          <div class="assessment-header">
+            <h3>${escapedQuestion}</h3>
+            <span class="question-type">Matching</span>
+          </div>
+          <form class="assessment-form" onsubmit="handleAssessmentSubmit(event, [${(correctAnswer || []).join(',')}])">
+            <div class="assessment-matching">
+              ${(items || []).map((item, idx) => `
+                <div class="matching-item">
+                  <span class="matching-stem">${escapeHtml(item.stem)}</span>
+                  <span class="matching-connector">matches</span>
+                  <select id="match-${block.id}-${idx}">
+                    <option value="">Select...</option>
+                    ${(choices || []).map((choice, choiceIdx) => `
+                      <option value="${choiceIdx}">${escapeHtml(choice)}</option>
+                    `).join('')}
+                  </select>
+                </div>
+              `).join('')}
+            </div>
+            <button type="submit" class="submit-btn">Submit Answer</button>
+          </form>
+          <div class="feedback-container" style="display:none;">
+            <p class="feedback"></p>
+          </div>
+        </section>
+      `;
+      break;
+      
+    default:
+      assessmentHtml = `
+        <section class="content-block assessment-block" role="region" aria-label="Knowledge check">
+          <div class="assessment-header">
+            <h3>${escapedQuestion}</h3>
+          </div>
+          <div class="assessment-content">
+            <p>Assessment type not recognized</p>
+          </div>
+        </section>
+      `;
+  }
+  
+  // Add JavaScript for client-side assessment handling
+  assessmentHtml += `
+    <script>
+      function handleAssessmentSubmit(event, correctAnswer) {
+        event.preventDefault();
+        const form = event.target;
+        const feedbackContainer = form.nextElementSibling;
+        const feedbackElement = feedbackContainer.querySelector('.feedback');
+        let userAnswer;
+        let isCorrect = false;
+        
+        // Determine the user's answer based on question type
+        if (Array.isArray(correctAnswer)) {
+          // Matching question - collect all selections
+          userAnswer = [];
+          for (let i = 0; i < correctAnswer.length; i++) {
+            const matchSelect = document.getElementById('match-' + ${block.id} + '-' + i);
+            if (matchSelect) {
+              userAnswer.push(parseInt(matchSelect.value));
+            }
+          }
+          isCorrect = JSON.stringify(userAnswer) === JSON.stringify(correctAnswer);
+        } else {
+          // Multiple choice, true/false, or fill-in-the-blank
+          const inputs = form.querySelectorAll('input[type="radio"], input[type="text"]');
+          if (inputs[0] && inputs[0].type === 'text') {
+            // Fill-in-the-blank
+            userAnswer = inputs[0].value.trim().toLowerCase();
+            isCorrect = userAnswer === correctAnswer.toLowerCase();
+          } else {
+            // Multiple choice or true/false
+            const selectedOption = form.querySelector('input[type="radio"]:checked');
+            userAnswer = selectedOption ? selectedOption.value : '';
+            isCorrect = userAnswer == correctAnswer;
+          }
+        }
+        
+        // Track assessment with xAPI
+        trackAssessmentInteraction('assessment-${block.id}', userAnswer, isCorrect);
+        
+        // Show feedback
+        feedbackContainer.style.display = 'block';
+        if (isCorrect) {
+          feedbackElement.textContent = '${escapedCorrectFeedback}';
+          feedbackElement.className = 'feedback correct';
+        } else {
+          feedbackElement.textContent = '${escapedIncorrectFeedback}';
+          feedbackElement.className = 'feedback incorrect';
+        }
+      }
+    </script>
+  `;
+  
+  return assessmentHtml;
+}
+
+function generateDragAndDropBlock(block) {
+  const { question, items = [], targets = [], correctMapping = {}, correctFeedback, incorrectFeedback } = block;
+  
+  const escapedQuestion = escapeHtml(question || 'Drag the items to the correct targets');
+  const escapedCorrectFeedback = escapeHtml(correctFeedback || 'Perfect! All items matched correctly.');
+  const escapedIncorrectFeedback = escapeHtml(incorrectFeedback || 'Some matches need correction.');
+  
+  let html = `
+    <section class="content-block interactive-block drag-and-drop-block" role="region" aria-label="Drag and drop exercise">
+      <div class="interactive-header">
+        <h3>${escapedQuestion}</h3>
+      </div>
+      
+      <div class="drag-container">
+        <div class="items-area">
+          <h4>Items to Drag</h4>
+          <div class="items-list">
+  `;
+  
+  items.forEach(item => {
+    html += `
+            <div 
+              class="draggable-item" 
+              draggable="true" 
+              ondragstart="dragStart(event, '${escapeHtml(item.id)}')"
+            >
+              ${escapeHtml(item.content)}
+            </div>
+    `;
+  });
+  
+  html += `
+          </div>
+        </div>
+        
+        <div class="targets-area">
+          <h4>Drop Targets</h4>
+          <div class="targets-list">
+  `;
+  
+  targets.forEach(target => {
+    html += `
+            <div 
+              class="drop-target" 
+              ondragover="allowDrop(event)" 
+              ondrop="drop(event, '${escapeHtml(target.id)}')"
+              id="target-${escapeHtml(target.id)}"
+            >
+              <div class="target-label">${escapeHtml(target.label)}</div>
+              <div class="target-content" id="content-${escapeHtml(target.id)}"></div>
+            </div>
+    `;
+  });
+  
+  html += `
+          </div>
+        </div>
+      </div>
+      
+      <div class="interactive-actions">
+        <button class="submit-btn" onclick="checkDragAndDrop('${escapeHtml(JSON.stringify(correctMapping).replace(/'/g, '&apos;'))}')">Submit Answer</button>
+        <button class="reset-btn" onclick="resetDragAndDrop()">Reset</button>
+      </div>
+      
+      <div class="feedback-container" style="display:none;">
+        <p class="feedback"></p>
+      </div>
+    </section>
+    
+    <script>
+      let dragData = {};
+      
+      function dragStart(e, id) {
+        e.dataTransfer.setData("text", id);
+      }
+      
+      function allowDrop(e) {
+        e.preventDefault();
+      }
+      
+      function drop(e, targetId) {
+        e.preventDefault();
+        const data = e.dataTransfer.getData("text");
+        document.getElementById('content-' + targetId).innerHTML = 
+          document.querySelector('.draggable-item[ondragstart*="' + data + '"]').innerHTML;
+        dragData[targetId] = data;
+      }
+      
+      function checkDragAndDrop(correctMappingStr) {
+        const correctMapping = JSON.parse(correctMappingStr.replace(/&apos;/g, "'"));
+        let correctCount = 0;
+        const total = Object.keys(correctMapping).length;
+        const responses = [];
+        
+        for (const [targetId, expectedItemId] of Object.entries(correctMapping)) {
+          const userResponse = dragData[targetId] || '';
+          responses.push(targetId + ':' + userResponse);
+          
+          if (userResponse === expectedItemId) {
+            document.getElementById('target-' + targetId).classList.add('correct');
+            correctCount++;
+          } else {
+            document.getElementById('target-' + targetId).classList.add('incorrect');
+          }
+        }
+        
+        // Track drag and drop with xAPI
+        const isCorrect = correctCount === total;
+        trackAssessmentInteraction('draganddrop-${block.id}', responses.join('|'), isCorrect);
+        
+        const feedbackContainer = document.querySelector('.feedback-container');
+        const feedbackElement = feedbackContainer.querySelector('.feedback');
+        feedbackContainer.style.display = 'block';
+        
+        if (correctCount === total) {
+          feedbackElement.textContent = '${escapedCorrectFeedback}';
+          feedbackElement.className = 'feedback correct';
+        } else {
+          const score = Math.round((correctCount / total) * 100);
+          feedbackElement.textContent = '${escapedIncorrectFeedback} Score: ' + score + '%';
+          feedbackElement.className = 'feedback incorrect';
+        }
+      }
+      
+      function resetDragAndDrop() {
+        dragData = {};
+        document.querySelectorAll('.drop-target').forEach(target => {
+          target.classList.remove('correct', 'incorrect');
+          document.getElementById('content-' + target.id.replace('target-', '')).innerHTML = '';
+        });
+        document.querySelector('.feedback-container').style.display = 'none';
+      }
+    </script>
+  `;
+  
+  return html;
+}
+
+function generateHotspotBlock(block) {
+  const { question, imageUrl, alt, hotspots = [], correctHotspot, correctFeedback, incorrectFeedback } = block;
+  
+  const escapedQuestion = escapeHtml(question || 'Click on the correct area in the image');
+  const escapedImageUrl = escapeHtml(imageUrl || '');
+  const escapedAlt = escapeHtml(alt || 'Interactive image');
+  const escapedCorrectFeedback = escapeHtml(correctFeedback || 'Correct! You identified the right area.');
+  const escapedIncorrectFeedback = escapeHtml(incorrectFeedback || 'Incorrect. Please try again.');
+  
+  let html = `
+    <section class="content-block interactive-block hotspot-block" role="region" aria-label="Hotspot image exercise">
+      <div class="interactive-header">
+        <h3>${escapedQuestion}</h3>
+      </div>
+      
+      <div class="hotspot-container">
+        <div class="image-container">
+  `;
+  
+  if (escapedImageUrl) {
+    html += `<img src="${escapedImageUrl}" alt="${escapedAlt}" id="hotspot-image" />`;
+  }
+  
+  hotspots.forEach(hotspot => {
+    html += `
+          <div 
+            class="hotspot-area" 
+            style="top: ${hotspot.top}%; left: ${hotspot.left}%; width: ${hotspot.width}%; height: ${hotspot.height}%;"
+            onclick="selectHotspot('${escapeHtml(hotspot.id)}')"
+            id="hotspot-${escapeHtml(hotspot.id)}"
+          ></div>
+    `;
+  });
+  
+  html += `
+        </div>
+      </div>
+      
+      <div class="interactive-actions">
+        <button class="submit-btn" onclick="checkHotspot('${escapeHtml(correctHotspot || '')}')">Submit Answer</button>
+        <button class="reset-btn" onclick="resetHotspot()">Reset</button>
+      </div>
+      
+      <div class="feedback-container" style="display:none;">
+        <p class="feedback"></p>
+      </div>
+    </section>
+    
+    <script>
+      let selectedHotspot = null;
+      
+      function selectHotspot(hotspotId) {
+        // Remove selected class from all hotspots
+        document.querySelectorAll('.hotspot-area').forEach(hs => {
+          hs.classList.remove('selected');
+        });
+        
+        // Add selected class to clicked hotspot
+        document.getElementById('hotspot-' + hotspotId).classList.add('selected');
+        selectedHotspot = hotspotId;
+      }
+      
+      function checkHotspot(correctHotspotId) {
+        // Track hotspot selection with xAPI
+        trackAssessmentInteraction('hotspot-${block.id}', selectedHotspot, selectedHotspot === correctHotspotId);
+        
+        const feedbackContainer = document.querySelector('.feedback-container');
+        const feedbackElement = feedbackContainer.querySelector('.feedback');
+        feedbackContainer.style.display = 'block';
+        
+        if (selectedHotspot === correctHotspotId) {
+          // Mark correct hotspot
+          document.getElementById('hotspot-' + correctHotspotId).classList.add('correct');
+          feedbackElement.textContent = '${escapedCorrectFeedback}';
+          feedbackElement.className = 'feedback correct';
+        } else {
+          // Mark correct hotspot
+          document.getElementById('hotspot-' + correctHotspotId).classList.add('correct');
+          feedbackElement.textContent = '${escapedIncorrectFeedback}';
+          feedbackElement.className = 'feedback incorrect';
+        }
+      }
+      
+      function resetHotspot() {
+        selectedHotspot = null;
+        document.querySelectorAll('.hotspot-area').forEach(hs => {
+          hs.classList.remove('selected', 'correct');
+        });
+        document.querySelector('.feedback-container').style.display = 'none';
+      }
+    </script>
+  `;
+  
+  return html;
 }
 
 function generateCSS() {
@@ -799,6 +1463,413 @@ footer p {
     page-break-inside: avoid;
     box-shadow: none;
     border: 1px solid #ccc;
+  }
+}
+
+/* Assessment block styles */
+.assessment-block {
+  border: 2px solid #1863d6;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  background-color: #f8f9ff;
+}
+
+.assessment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e0e5ff;
+}
+
+.assessment-header h3 {
+  margin: 0;
+  color: #001f3d;
+  font-size: 1.2rem;
+}
+
+.question-type {
+  background-color: #1863d6;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.assessment-form {
+  margin: 1rem 0;
+}
+
+.assessment-options {
+  margin: 1rem 0;
+}
+
+.option-item {
+  margin-bottom: 0.5rem;
+}
+
+.option-item label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.option-item label:hover {
+  background-color: #eef2ff;
+}
+
+.option-item input {
+  margin-right: 0.5rem;
+}
+
+.assessment-input {
+  margin: 1rem 0;
+}
+
+.assessment-input input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #b6cbe1;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.assessment-matching {
+  margin: 1rem 0;
+}
+
+.matching-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.matching-stem {
+  font-weight: bold;
+  color: #001f3d;
+}
+
+.matching-connector {
+  color: #666;
+}
+
+.matching-item select {
+  padding: 0.25rem;
+  border: 1px solid #b6cbe1;
+  border-radius: 4px;
+}
+
+.submit-btn {
+  background-color: #1863d6;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.submit-btn:hover {
+  background-color: #0a56c1;
+}
+
+.feedback {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.feedback.correct {
+  background-color: #e6f4ea;
+  color: #0a7e3a;
+  border: 1px solid #0a7e3a;
+}
+
+.feedback.incorrect {
+  background-color: #fce8e6;
+  color: #c5221f;
+  border: 1px solid #c5221f;
+}
+
+/* Interactive block styles */
+.interactive-block {
+  border: 2px solid #1863d6;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  background-color: #f8f9ff;
+}
+
+.interactive-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e0e5ff;
+}
+
+.interactive-header h3 {
+  margin: 0;
+  color: #001f3d;
+  font-size: 1.2rem;
+}
+
+/* Drag and Drop Styles */
+.drag-and-drop-block .drag-container {
+  display: flex;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.drag-and-drop-block .items-area,
+.drag-and-drop-block .targets-area {
+  flex: 1;
+  padding: 1rem;
+  border: 1px solid #b6cbe1;
+  border-radius: 4px;
+  background-color: #f8f9ff;
+}
+
+.drag-and-drop-block .items-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.draggable-item {
+  padding: 0.75rem;
+  background-color: #eef2ff;
+  border: 1px solid #b6cbe1;
+  border-radius: 4px;
+  cursor: move;
+  user-select: none;
+  transition: all 0.2s;
+}
+
+.draggable-item:hover {
+  background-color: #dce6ff;
+  transform: translateY(-2px);
+}
+
+.drop-target {
+  min-height: 60px;
+  padding: 0.75rem;
+  border: 2px dashed #b6cbe1;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  background-color: white;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+.drop-target.filled {
+  border: 2px solid #1863d6;
+  background-color: #f0f7ff;
+}
+
+.drop-target.correct {
+  border: 2px solid #0a7e3a;
+  background-color: #e6f4ea;
+}
+
+.drop-target.incorrect {
+  border: 2px solid #c5221f;
+  background-color: #fce8e6;
+}
+
+.target-label {
+  font-weight: bold;
+  color: #001f3d;
+  margin-bottom: 0.25rem;
+}
+
+.target-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 0.25rem;
+  background-color: #eef2ff;
+  border-radius: 2px;
+}
+
+/* Hotspot Styles */
+.hotspot-container {
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.image-container {
+  position: relative;
+  display: inline-block;
+}
+
+.image-container img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #b6cbe1;
+  border-radius: 4px;
+}
+
+.hotspot-area {
+  position: absolute;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.hotspot-area:hover {
+  border-color: #1863d6;
+  background-color: rgba(24, 99, 214, 0.1);
+}
+
+.hotspot-area.selected {
+  border-color: #1863d6;
+  background-color: rgba(24, 99, 214, 0.2);
+}
+
+.hotspot-area.correct {
+  border-color: #0a7e3a;
+  background-color: rgba(10, 126, 58, 0.2);
+  animation: pulse 0.5s;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Common Interactive Styles */
+.interactive-actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.submit-btn, .reset-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.submit-btn {
+  background-color: #1863d6;
+  color: white;
+}
+
+.submit-btn:hover {
+  background-color: #0a56c1;
+}
+
+.reset-btn {
+  background-color: #f0f4ff;
+  color: #1863d6;
+}
+
+.reset-btn:hover {
+  background-color: #e0e8ff;
+}
+
+/* Page Navigation Styles */
+.page-navigation {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: #f8f9ff;
+  border-radius: 8px;
+  border: 1px solid #e0e5ff;
+}
+
+.page-navigation ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.page-navigation li {
+  margin-bottom: 0.75rem;
+}
+
+.page-navigation .toc h3 {
+  margin: 0 0 1rem 0;
+  color: #001f3d;
+  font-size: 1.1rem;
+}
+
+.page-navigation .toc-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.5rem;
+}
+
+.page-navigation .toc-list li {
+  margin-bottom: 0.25rem;
+}
+
+.page-navigation .toc-list a {
+  display: block;
+  padding: 0.5rem;
+  border-radius: 4px;
+  text-decoration: none;
+  color: #1863d6;
+  transition: background-color 0.2s;
+}
+
+.page-navigation .toc-list a:hover {
+  background-color: #eef2ff;
+}
+
+.page-navigation .toc-list .current a {
+  background-color: #1863d6;
+  color: white;
+  font-weight: bold;
+}
+
+.nav-link {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background-color: #1863d6;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.nav-link:hover {
+  background-color: #0a56c1;
+}
+
+.nav-link.prev {
+  margin-right: 1rem;
+}
+
+.nav-link.next {
+  float: right;
+}
+
+@media (max-width: 768px) {
+  .page-navigation .toc-list {
+    grid-template-columns: 1fr;
+  }
+  
+  .nav-link.next {
+    float: none;
+    display: block;
+    margin-top: 1rem;
   }
 }`;
 }

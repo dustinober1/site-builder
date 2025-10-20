@@ -1,4 +1,6 @@
 import React from 'react';
+import AssessmentBlock from './AssessmentBlock';
+import { DragAndDropBlock, HotspotBlock } from './InteractiveBlock';
 import './ContentBlock.css';
 
 function ContentBlock({
@@ -30,14 +32,19 @@ function ContentBlock({
       case 'knowledge-check':
         return (
           <div className="preview-knowledge-check">
-            <p><strong>✓ Knowledge Check:</strong> {block.question || 'Question not set'}</p>
-            {block.options && block.options.length > 0 && (
-              <ul>
-                {block.options.map((opt, i) => (
-                  <li key={i}>○ {opt}</li>
-                ))}
-              </ul>
-            )}
+            <AssessmentBlock block={block} isPreview={true} />
+          </div>
+        );
+      case 'drag-and-drop':
+        return (
+          <div className="preview-drag-and-drop">
+            <DragAndDropBlock block={block} isPreview={true} />
+          </div>
+        );
+      case 'hotspot':
+        return (
+          <div className="preview-hotspot">
+            <HotspotBlock block={block} isPreview={true} />
           </div>
         );
       case 'advanced-question':

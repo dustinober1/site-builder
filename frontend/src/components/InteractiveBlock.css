@@ -1,0 +1,236 @@
+.interactive-block {
+  border: 2px solid #1863d6;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  background-color: #f8f9ff;
+}
+
+.interactive-block.preview-mode {
+  border: 1px dashed #1863d6;
+  background-color: #f0f4ff;
+}
+
+.interactive-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e0e5ff;
+}
+
+.interactive-header h3 {
+  margin: 0;
+  color: #001f3d;
+  font-size: 1.2rem;
+}
+
+.question-type-badge {
+  background-color: #1863d6;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+/* Drag and Drop Styles */
+.drag-and-drop .drag-container {
+  display: flex;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.drag-and-drop .items-area,
+.drag-and-drop .targets-area {
+  flex: 1;
+  padding: 1rem;
+  border: 1px solid #b6cbe1;
+  border-radius: 4px;
+  background-color: #f8f9ff;
+}
+
+.drag-and-drop .items-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.draggable-item {
+  padding: 0.75rem;
+  background-color: #eef2ff;
+  border: 1px solid #b6cbe1;
+  border-radius: 4px;
+  cursor: grab;
+  user-select: none;
+  transition: all 0.2s;
+}
+
+.draggable-item:hover {
+  background-color: #dce6ff;
+  transform: translateY(-2px);
+}
+
+.draggable-item.placed {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.drop-target {
+  min-height: 60px;
+  padding: 0.75rem;
+  border: 2px dashed #b6cbe1;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  background-color: white;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+.drop-target.filled {
+  border: 2px solid #1863d6;
+  background-color: #f0f7ff;
+}
+
+.drop-target.correct {
+  border: 2px solid #0a7e3a;
+  background-color: #e6f4ea;
+}
+
+.drop-target.incorrect {
+  border: 2px solid #c5221f;
+  background-color: #fce8e6;
+}
+
+.target-label {
+  font-weight: bold;
+  color: #001f3d;
+  margin-bottom: 0.25rem;
+}
+
+.target-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 0.25rem;
+  background-color: #eef2ff;
+  border-radius: 2px;
+}
+
+/* Hotspot Styles */
+.hotspot-container {
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.image-container {
+  position: relative;
+  display: inline-block;
+}
+
+.image-container img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #b6cbe1;
+  border-radius: 4px;
+}
+
+.hotspot-area {
+  position: absolute;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.hotspot-area:hover {
+  border-color: #1863d6;
+  background-color: rgba(24, 99, 214, 0.1);
+}
+
+.hotspot-area.selected {
+  border-color: #1863d6;
+  background-color: rgba(24, 99, 214, 0.2);
+}
+
+.hotspot-area.correct {
+  border-color: #0a7e3a;
+  background-color: rgba(10, 126, 58, 0.2);
+  animation: pulse 0.5s;
+}
+
+.hotspot-indicator {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: #0a7e3a;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Common Styles */
+.interactive-actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.submit-btn, .reset-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.submit-btn {
+  background-color: #1863d6;
+  color: white;
+}
+
+.submit-btn:hover {
+  background-color: #0a56c1;
+}
+
+.reset-btn {
+  background-color: #f0f4ff;
+  color: #1863d6;
+}
+
+.reset-btn:hover {
+  background-color: #e0e8ff;
+}
+
+.feedback {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.feedback.correct {
+  background-color: #e6f4ea;
+  color: #0a7e3a;
+  border: 1px solid #0a7e3a;
+}
+
+.feedback.incorrect {
+  background-color: #fce8e6;
+  color: #c5221f;
+  border: 1px solid #c5221f;
+}

@@ -1,0 +1,133 @@
+.assessment-block {
+  border: 2px solid #1863d6;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  background-color: #f8f9ff;
+}
+
+.assessment-block.preview-mode {
+  border: 1px dashed #1863d6;
+  background-color: #f0f4ff;
+}
+
+.assessment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e0e5ff;
+}
+
+.assessment-header h3 {
+  margin: 0;
+  color: #001f3d;
+  font-size: 1.2rem;
+}
+
+.question-type-badge {
+  background-color: #1863d6;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.assessment-options {
+  margin: 1rem 0;
+}
+
+.option-item {
+  margin-bottom: 0.5rem;
+}
+
+.option-item label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.option-item label:hover {
+  background-color: #eef2ff;
+}
+
+.option-item input {
+  margin-right: 0.5rem;
+}
+
+.assessment-input {
+  margin: 1rem 0;
+}
+
+.assessment-input input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #b6cbe1;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.assessment-matching {
+  margin: 1rem 0;
+}
+
+.matching-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.matching-stem {
+  font-weight: bold;
+  color: #001f3d;
+}
+
+.matching-connector {
+  color: #666;
+}
+
+.matching-item select {
+  padding: 0.25rem;
+  border: 1px solid #b6cbe1;
+  border-radius: 4px;
+}
+
+.submit-btn {
+  background-color: #1863d6;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.submit-btn:hover {
+  background-color: #0a56c1;
+}
+
+.feedback {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.feedback.correct {
+  background-color: #e6f4ea;
+  color: #0a7e3a;
+  border: 1px solid #0a7e3a;
+}
+
+.feedback.incorrect {
+  background-color: #fce8e6;
+  color: #c5221f;
+  border: 1px solid #c5221f;
+}
