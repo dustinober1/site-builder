@@ -112,6 +112,7 @@
   }
 }
 
+.template-button,
 .preview-button,
 .generate-button {
   color: white;
@@ -126,6 +127,38 @@
   box-shadow: var(--shadow-md);
   position: relative;
   overflow: hidden;
+}
+
+.template-button {
+  background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);
+}
+
+.template-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.publish-button {
+  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+  color: white;
+  padding: 0.75rem 1.75rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  border: 2px solid transparent;
+  white-space: nowrap;
+  flex: 0 0 auto;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.publish-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
 }
 
 .preview-button {

@@ -1,0 +1,154 @@
+.smart-suggestions {
+  background-color: white;
+  border: 1px solid #e0e5ff;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  max-width: 400px;
+  width: 100%;
+}
+
+.smart-suggestions.hidden {
+  padding: 0.5rem 1rem;
+  max-height: 50px;
+  overflow: hidden;
+}
+
+.smart-suggestions.visible {
+  max-height: 500px;
+}
+
+.suggestions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e0e5ff;
+}
+
+.suggestions-header h3 {
+  margin: 0;
+  color: #001f3d;
+  font-size: 1.1rem;
+}
+
+.toggle-suggestions {
+  background: none;
+  border: 1px solid #b6cbe1;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.suggestions-tabs {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 1rem;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 0.5rem;
+  background: #f8f9ff;
+  border: 1px solid #e0e5ff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.tab-button.active {
+  background: #1863d6;
+  color: white;
+  border-color: #1863d6;
+}
+
+.suggestions-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.suggestion-item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.suggestion-item:hover {
+  background-color: #f8f9ff;
+}
+
+.suggestion-item.action {
+  border-left: 3px solid #1863d6;
+}
+
+.suggestion-item.tip {
+  border-left: 3px solid #ff9800;
+  background-color: #fff8e1;
+}
+
+.suggestion-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.suggestion-content {
+  flex: 1;
+}
+
+.suggestion-content h4 {
+  margin: 0 0 0.25rem 0;
+  color: #001f3d;
+  font-size: 0.95rem;
+}
+
+.suggestion-content p {
+  margin: 0;
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.suggestion-action {
+  display: flex;
+  align-items: center;
+}
+
+.accept-suggestion {
+  background-color: #1863d6;
+  color: white;
+  border: none;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.accept-suggestion:hover {
+  background-color: #0a56c1;
+}
+
+.no-suggestions {
+  padding: 1rem;
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .smart-suggestions {
+    max-width: 100%;
+  }
+}

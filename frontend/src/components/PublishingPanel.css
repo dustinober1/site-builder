@@ -1,0 +1,271 @@
+.publishing-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.publishing-panel {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 700px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.publishing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e0e5ff;
+  background-color: #f8f9ff;
+  border-radius: 12px 12px 0 0;
+}
+
+.publishing-header h2 {
+  margin: 0;
+  color: #001f3d;
+  font-size: 1.5rem;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.close-button:hover {
+  background-color: #e0e5ff;
+}
+
+.publishing-content {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.option-group {
+  margin-bottom: 25px;
+}
+
+.option-label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: #001f3d;
+}
+
+.publishing-methods {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+@media (max-width: 768px) {
+  .publishing-methods {
+    grid-template-columns: 1fr;
+  }
+}
+
+.method-option {
+  display: flex;
+  margin: 0;
+}
+
+.method-option input[type="radio"] {
+  display: none;
+}
+
+.method-card {
+  flex: 1;
+  border: 2px solid #e0e5ff;
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.method-option input[type="radio"]:checked + .method-card {
+  border-color: #1863d6;
+  background-color: #f0f7ff;
+  box-shadow: 0 5px 15px rgba(24, 99, 214, 0.1);
+}
+
+.method-card:hover {
+  border-color: #1863d6;
+  transform: translateY(-3px);
+}
+
+.method-card h3 {
+  margin: 0 0 10px 0;
+  color: #001f3d;
+}
+
+.method-card p {
+  margin: 0 0 15px 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.method-features {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.feature {
+  font-size: 0.8rem;
+  color: #0a7e3a;
+}
+
+.hosted-options {
+  background-color: #f8f9ff;
+  padding: 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: #001f3d;
+}
+
+.form-group input[type="text"],
+.form-group input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #b6cbe1;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-group input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+.password-input {
+  margin-top: 5px;
+}
+
+.help-text {
+  font-size: 0.8rem;
+  color: #666;
+  margin: 5px 0 0 0;
+}
+
+.publishing-actions {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.publish-button {
+  background-color: #1863d6;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: 100%;
+  max-width: 300px;
+}
+
+.publish-button:hover:not(:disabled) {
+  background-color: #0a56c1;
+}
+
+.publish-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.publish-button.publishing {
+  background-color: #ff9800;
+}
+
+.publish-button.success {
+  background-color: #0a7e3a;
+}
+
+.publishing-status {
+  margin-top: 15px;
+  padding: 15px;
+  border-radius: 6px;
+  text-align: left;
+}
+
+.publishing-status.publishing {
+  background-color: #fff3e0;
+  color: #ff9800;
+}
+
+.publishing-status.success {
+  background-color: #e8f5e9;
+  color: #0a7e3a;
+}
+
+.publishing-status.error {
+  background-color: #ffebee;
+  color: #c5221f;
+}
+
+.success-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.view-course-button,
+.copy-link-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.view-course-button {
+  background-color: #1863d6;
+  color: white;
+}
+
+.copy-link-button {
+  background-color: #f0f4ff;
+  color: #1863d6;
+}
+
+.view-course-button:hover,
+.copy-link-button:hover {
+  opacity: 0.9;
+}

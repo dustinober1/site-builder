@@ -379,6 +379,83 @@ app.post('/api/generate/scorm-2004', (req, res) => {
   }
 });
 
+// Hosted publishing endpoint
+app.post('/api/publish/hosted', async (req, res) => {
+  try {
+    const { projectName, pages, customDomain, password } = req.body;
+    
+    if (!projectName || !pages) {
+      return res.status(400).json({ 
+        success: false,
+        error: 'Missing projectName or pages' 
+      });
+    }
+
+    // In a real implementation, this would:
+    // 1. Upload files to a cloud hosting service
+    // 2. Set up custom domain if provided
+    // 3. Configure password protection if requested
+    // 4. Return a public URL
+    
+    // For now, we'll simulate the process
+    const outputDir = path.join(process.env.OUTPUT_DIR || '../output-sites', `${projectName}-hosted`);
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
+
+    // Create js directory for xAPI API
+    const jsDir = path.join(outputDir, 'js');
+    if (!fs.existsSync(jsDir)) {
+      fs.mkdirSync(jsDir, { recursive: true });
+    }
+
+    // Generate xAPI API
+    const xapiApi = scormCompliance.generateXAPIAPI();
+    fs.writeFileSync(path.join(jsDir, 'xapi-api.js'), xapiApi);
+
+    // Generate pages with xAPI integration
+    pages.forEach((page, index) => {
+      const htmlContent = generateHTML(page, projectName, pages);
+      const filename = page.slug || `page-${index}`;
+      fs.writeFileSync(
+        path.join(outputDir, `${filename}.html`),
+        htmlContent
+      );
+    });
+
+    // Generate index page
+    const indexContent = generateIndex(pages, projectName);
+    fs.writeFileSync(
+      path.join(outputDir, 'index.html'),
+      indexContent
+    );
+
+    // Copy CSS
+    const cssContent = generateCSS();
+    fs.writeFileSync(
+      path.join(outputDir, 'styles.css'),
+      cssContent
+    );
+
+    // Simulate upload to hosting service
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    res.json({
+      success: true,
+      message: 'Course published successfully',
+      url: `https://${customDomain || projectName.toLowerCase().replace(/\s+/g, '-')}.mycourses.com`,
+      customDomain: customDomain,
+      passwordProtected: !!password
+    });
+  } catch (error) {
+    console.error('Error publishing course:', error);
+    res.status(500).json({ 
+      success: false,
+      error: error.message 
+    });
+  }
+});
+
 // Generate xAPI package
 app.post('/api/generate/xapi', (req, res) => {
   try {

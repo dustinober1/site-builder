@@ -3,6 +3,7 @@ import './App.css';
 import Editor from './components/Editor';
 import ProjectList from './components/ProjectList';
 import WelcomeScreen from './components/WelcomeScreen';
+import TemplateLibrary from './components/TemplateLibrary';
 import { getAllProjects } from './utils/projectStorage';
 
 function App() {

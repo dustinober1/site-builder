@@ -7,6 +7,9 @@ import PreviewModal from './PreviewModal';
 import ProgressTracker from './ProgressTracker';
 import LearningPath from './LearningPath';
 import AnalyticsDashboard from './AnalyticsDashboard';
+import TemplateLibrary from './TemplateLibrary';
+import SmartSuggestions from './SmartSuggestions';
+import PublishingPanel from './PublishingPanel';
 import { autoSaveProject, saveProject } from '../utils/projectStorage';
 import axios from 'axios';
 
@@ -21,6 +24,8 @@ function Editor({ project, onBack }) {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState('');
   const [activeTab, setActiveTab] = useState('properties');
+  const [showTemplateLibrary, setShowTemplateLibrary] = useState(false);
+  const [showPublishingPanel, setShowPublishingPanel] = useState(false);
 
   // Auto-save project when blocks change
   useEffect(() => {
@@ -108,7 +113,6 @@ function Editor({ project, onBack }) {
           incorrectFeedback: 'Incorrect. Please try again.'
         };
         break;
-        break;
       case 'advanced-question':
         newBlock = {
           ...newBlock,
@@ -183,6 +187,34 @@ function Editor({ project, onBack }) {
     }
   };
 
+  const handleApplyTemplate = useCallback((template) => {
+    // Apply the template blocks to the current page
+    setBlocks(template.blocks);
+    
+    // Optionally apply color scheme (would need to be implemented in the backend)
+    // For now, just apply the content blocks
+    console.log('Applying template:', template);
+  }, []);
+
+  const handleSuggestionAccept = useCallback((suggestion) => {
+    // Create a new block based on the suggestion
+    const newBlock = {
+      id: Date.now(),
+      type: suggestion.type,
+      content: suggestion.content || '',
+      question: suggestion.question || '',
+      questionType: suggestion.questionType || 'multiple-choice',
+      options: suggestion.options || [],
+      correctAnswer: suggestion.correctAnswer !== undefined ? suggestion.correctAnswer : 0,
+      alt: '',
+      title: '',
+      url: ''
+    };
+
+    // Add the new block to the current page
+    setBlocks([...blocks, newBlock]);
+  }, [blocks]);
+
   const selectedBlock = blocks.find(b => b.id === selectedBlockId);
 
   return (
@@ -212,6 +244,20 @@ function Editor({ project, onBack }) {
             </div>
           )}
           <button
+            className="template-button"
+            onClick={() => setShowTemplateLibrary(true)}
+            aria-label="Apply a template to your course"
+          >
+            🎨 Templates
+          </button>
+          <button
+            className="publish-button"
+            onClick={() => setShowPublishingPanel(true)}
+            aria-label="Publish your course"
+          >
+            🚀 Publish
+          </button>
+          <button
             className="preview-button"
             onClick={() => setIsPreviewOpen(true)}
             aria-label="Preview the course before exporting"
@@ -228,6 +274,27 @@ function Editor({ project, onBack }) {
           </button>
         </div>
       </header>
+      
+      {showTemplateLibrary && (
+        <TemplateLibrary
+          onSelectTemplate={handleApplyTemplate}
+          onClose={() => setShowTemplateLibrary(false)}
+        />
+      )}
+      
+      {showPublishingPanel && (
+        <PublishingPanel
+          project={{
+            ...project,
+            pages: project.pages.map(page => 
+              page.id === currentPage.id 
+                ? { ...page, content: blocks } 
+                : page
+            )
+          }}
+          onClose={() => setShowPublishingPanel(false)}
+        />
+      )}
 
       <div className="editor-content">
         <Toolbar onAddBlock={handleAddBlock} />
@@ -256,6 +323,11 @@ function Editor({ project, onBack }) {
                 setCurrentPage(page);
                 setBlocks(page.content || []);
               }}
+            />
+            <SmartSuggestions
+              currentPage={currentPage}
+              blocks={blocks}
+              onSuggestionAccept={handleSuggestionAccept}
             />
             <div className="panel-tabs">
               <button 
