@@ -1,0 +1,259 @@
+.offline-sync-manager {
+  padding: 1rem;
+  background-color: #f8f9ff;
+  border-radius: 8px;
+  border: 1px solid #e0e5ff;
+  margin-bottom: 1rem;
+}
+
+.offline-sync-manager h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: #001f3d;
+}
+
+.offline-sync-manager p {
+  margin-bottom: 1.5rem;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+  background-color: #1863d6;
+}
+
+input:checked + .toggle-slider:before {
+  transform: translateX(26px);
+}
+
+.toggle-label {
+  font-weight: 500;
+  color: #001f3d;
+}
+
+.sync-settings {
+  border-top: 1px solid #e0e5ff;
+  padding-top: 1rem;
+}
+
+.sync-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.sync-status {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #ccc;
+}
+
+.status-indicator.syncing .status-dot {
+  background-color: #ffc107;
+  animation: pulse 1s infinite;
+}
+
+.status-indicator.synced .status-dot {
+  background-color: #28a745;
+  box-shadow: 0 0 6px #28a745;
+}
+
+.status-indicator.error .status-dot {
+  background-color: #dc3545;
+}
+
+.sync-btn {
+  padding: 0.5rem 1rem;
+  background-color: #1863d6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.sync-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.settings-section h4,
+.storage-info h4,
+.progress-data h4,
+.offline-features h4 {
+  margin: 0 0 1rem 0;
+  color: #001f3d;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e0e5ff;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #001f3d;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.storage-bar {
+  width: 100%;
+  height: 20px;
+  background-color: #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.storage-fill {
+  height: 100%;
+  background-color: #1863d6;
+  transition: width 0.3s ease;
+}
+
+.storage-text {
+  font-weight: 500;
+  color: #001f3d;
+}
+
+.warning {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.progress-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.stat-item {
+  padding: 0.75rem;
+  background-color: white;
+  border: 1px solid #e0e5ff;
+  border-radius: 4px;
+}
+
+.stat-label {
+  display: block;
+  color: #6c757d;
+  font-size: 0.8rem;
+  margin-bottom: 0.25rem;
+}
+
+.stat-value {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #001f3d;
+}
+
+.offline-features ul {
+  margin: 1rem 0;
+  padding-left: 1.25rem;
+  color: #333;
+}
+
+.offline-features li {
+  margin-bottom: 0.5rem;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .sync-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .toggle-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .progress-stats {
+    grid-template-columns: 1fr;
+  }
+}

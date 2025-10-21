@@ -10,6 +10,7 @@ function Toolbar({ onAddBlock }) {
     { type: 'knowledge-check', label: 'Knowledge Check', icon: '✓' },
     { type: 'drag-and-drop', label: 'Drag & Drop', icon: '✊' },
     { type: 'hotspot', label: 'Hotspot Image', icon: '🎯' },
+    { type: 'interactive-video', label: 'Interactive Video', icon: '🎬' },
     { type: 'advanced-question', label: 'Advanced Question', icon: '❓' },
     { type: 'branching-scenario', label: 'Branching Scenario', icon: '🔀' }
   ];

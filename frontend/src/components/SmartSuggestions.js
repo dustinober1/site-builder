@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import AISuggestions from './AISuggestions';
 import './SmartSuggestions.css';
 
-function SmartSuggestions({ currentPage, blocks, onSuggestionAccept }) {
+function SmartSuggestions({ project, currentPage, blocks, onSuggestionAccept }) {
   const [suggestions, setSuggestions] = useState([]);
   const [visible, setVisible] = useState(true);
   const [activeTab, setActiveTab] = useState('content');
@@ -146,6 +147,12 @@ function SmartSuggestions({ currentPage, blocks, onSuggestionAccept }) {
               onClick={() => setActiveTab('tip')}
             >
               Tips
+            </button>
+            <button 
+              className={`tab-button ${activeTab === 'ai' ? 'active' : ''}`}
+              onClick={() => setActiveTab('ai')}
+            >
+              AI Suggestions
             </button>
           </div>
           

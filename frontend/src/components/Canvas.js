@@ -2,7 +2,7 @@ import React from 'react';
 import './Canvas.css';
 import ContentBlock from './ContentBlock';
 
-function Canvas({ blocks, selectedBlockId, onSelectBlock, onDeleteBlock, onMoveBlock }) {
+function Canvas({ blocks, selectedBlockId, onSelectBlock, onDeleteBlock, onMoveBlock, onUpdateBlock }) {
   return (
     <main className="canvas" role="main" aria-label="Page canvas">
       <div className="canvas-content">
@@ -21,6 +21,7 @@ function Canvas({ blocks, selectedBlockId, onSelectBlock, onDeleteBlock, onMoveB
                 onDelete={() => onDeleteBlock(block.id)}
                 onMoveUp={index > 0 ? () => onMoveBlock(index, index - 1) : null}
                 onMoveDown={index < blocks.length - 1 ? () => onMoveBlock(index, index + 1) : null}
+                onUpdateBlock={onUpdateBlock}
               />
             ))}
           </div>

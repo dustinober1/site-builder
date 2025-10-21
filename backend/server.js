@@ -3,11 +3,14 @@ const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const http = require('http');
 require('dotenv').config();
 
 const scormCompliance = require('./scorm-compliance');
+const CollaborationServer = require('./collaboration');
 
 const app = express();
+const server = http.createServer(app);
 const PORT = process.env.PORT || 5000;
 
 // Logging Middleware
@@ -191,7 +194,13 @@ app.post('/api/generate/site', validateRequest({
   pages: { required: true, type: 'object' }
 }), (req, res, next) => {
   try {
-    const { projectName, pages } = req.body;
+    const { projectName, pages, theme, mobileOptimized, fontSize, customColors } = req.body;
+    const projectSettings = {
+      theme,
+      mobileOptimized,
+      fontSize,
+      customColors
+    };
     
     if (!Array.isArray(pages) || pages.length === 0) {
       return res.status(400).json({ 
@@ -211,7 +220,7 @@ app.post('/api/generate/site', validateRequest({
 
     // Generate pages
     pages.forEach((page, index) => {
-      const htmlContent = generateHTML(page, projectName);
+      const htmlContent = generateHTML(page, projectName, pages, projectSettings);
       const filename = page.slug || `page-${index}`;
       fs.writeFileSync(
         path.join(outputDir, `${filename}.html`),
@@ -228,7 +237,7 @@ app.post('/api/generate/site', validateRequest({
     );
 
     // Copy CSS
-    const cssContent = generateCSS();
+    const cssContent = generateCSS(projectSettings);
     fs.writeFileSync(
       path.join(outputDir, 'styles.css'),
       cssContent
@@ -280,7 +289,7 @@ app.post('/api/generate/scorm-12', (req, res) => {
 
     // Generate pages with SCORM wrapper
     pages.forEach((page, index) => {
-      const htmlContent = generateHTML(page, projectName);
+      const htmlContent = generateHTML(page, projectName, pages, projectSettings);
       const filename = page.slug || `page-${index}`;
       fs.writeFileSync(
         path.join(outputDir, `${filename}.html`),
@@ -296,7 +305,7 @@ app.post('/api/generate/scorm-12', (req, res) => {
     );
 
     // Copy CSS
-    const cssContent = generateCSS();
+    const cssContent = generateCSS(projectSettings);
     fs.writeFileSync(
       path.join(outputDir, 'styles.css'),
       cssContent
@@ -344,7 +353,7 @@ app.post('/api/generate/scorm-2004', (req, res) => {
 
     // Generate pages
     pages.forEach((page, index) => {
-      const htmlContent = generateHTML(page, projectName);
+      const htmlContent = generateHTML(page, projectName, pages, projectSettings);
       const filename = page.slug || `page-${index}`;
       fs.writeFileSync(
         path.join(outputDir, `${filename}.html`),
@@ -360,7 +369,7 @@ app.post('/api/generate/scorm-2004', (req, res) => {
     );
 
     // Copy CSS
-    const cssContent = generateCSS();
+    const cssContent = generateCSS(projectSettings);
     fs.writeFileSync(
       path.join(outputDir, 'styles.css'),
       cssContent
@@ -382,7 +391,13 @@ app.post('/api/generate/scorm-2004', (req, res) => {
 // Hosted publishing endpoint
 app.post('/api/publish/hosted', async (req, res) => {
   try {
-    const { projectName, pages, customDomain, password } = req.body;
+    const { projectName, pages, customDomain, password, theme, mobileOptimized, fontSize, customColors } = req.body;
+    const projectSettings = {
+      theme,
+      mobileOptimized,
+      fontSize,
+      customColors
+    };
     
     if (!projectName || !pages) {
       return res.status(400).json({ 
@@ -415,7 +430,7 @@ app.post('/api/publish/hosted', async (req, res) => {
 
     // Generate pages with xAPI integration
     pages.forEach((page, index) => {
-      const htmlContent = generateHTML(page, projectName, pages);
+      const htmlContent = generateHTML(page, projectName, pages, projectSettings);
       const filename = page.slug || `page-${index}`;
       fs.writeFileSync(
         path.join(outputDir, `${filename}.html`),
@@ -424,14 +439,14 @@ app.post('/api/publish/hosted', async (req, res) => {
     });
 
     // Generate index page
-    const indexContent = generateIndex(pages, projectName);
+    const indexContent = generateIndex(pages, projectName, projectSettings);
     fs.writeFileSync(
       path.join(outputDir, 'index.html'),
       indexContent
     );
 
     // Copy CSS
-    const cssContent = generateCSS();
+    const cssContent = generateCSS(projectSettings);
     fs.writeFileSync(
       path.join(outputDir, 'styles.css'),
       cssContent
@@ -459,7 +474,13 @@ app.post('/api/publish/hosted', async (req, res) => {
 // Generate xAPI package
 app.post('/api/generate/xapi', (req, res) => {
   try {
-    const { projectName, pages } = req.body;
+    const { projectName, pages, theme, mobileOptimized, fontSize, customColors } = req.body;
+    const projectSettings = {
+      theme,
+      mobileOptimized,
+      fontSize,
+      customColors
+    };
     
     if (!projectName || !pages) {
       return res.status(400).json({ error: 'Missing projectName or pages' });
@@ -482,7 +503,7 @@ app.post('/api/generate/xapi', (req, res) => {
 
     // Generate pages with xAPI integration
     pages.forEach((page, index) => {
-      const htmlContent = generateHTML(page, projectName, pages);
+      const htmlContent = generateHTML(page, projectName, pages, projectSettings);
       const filename = page.slug || `page-${index}`;
       fs.writeFileSync(
         path.join(outputDir, `${filename}.html`),
@@ -491,14 +512,14 @@ app.post('/api/generate/xapi', (req, res) => {
     });
 
     // Generate index page
-    const indexContent = generateIndex(pages, projectName);
+    const indexContent = generateIndex(pages, projectName, projectSettings);
     fs.writeFileSync(
       path.join(outputDir, 'index.html'),
       indexContent
     );
 
     // Copy CSS
-    const cssContent = generateCSS();
+    const cssContent = generateCSS(projectSettings);
     fs.writeFileSync(
       path.join(outputDir, 'styles.css'),
       cssContent
@@ -518,7 +539,7 @@ app.post('/api/generate/xapi', (req, res) => {
 });
 
 // Helper function to generate HTML
-function generateHTML(page, projectName, allPages = []) {
+function generateHTML(page, projectName, allPages = [], projectSettings = {}) {
   const content = page.content || [];
   
   let contentHTML = '';
@@ -703,7 +724,7 @@ function generateNavigation(currentPage, allPages) {
   return navHTML;
 }
 
-function generateIndex(pages, projectName) {
+function generateIndex(pages, projectName, projectSettings = {}) {
   let pageLinks = pages.map((page, idx) => 
     `<li><a href="${page.slug || `page-${idx}`}.html">${escapeHtml(page.title)}</a></li>`
   ).join('\n');
@@ -1244,7 +1265,61 @@ function generateHotspotBlock(block) {
   return html;
 }
 
-function generateCSS() {
+function generateCSS(projectSettings = {}) {
+  // Use default theme if no settings provided
+  const theme = projectSettings.theme || 'default';
+  const customColors = projectSettings.customColors || {};
+  const fontSize = projectSettings.fontSize || 16;
+  const mobileOptimized = projectSettings.mobileOptimized || false;
+  
+  // Define color scheme based on theme
+  let primaryColor = customColors.primary || '#001f3d';
+  let secondaryColor = customColors.secondary || '#151983';
+  let accentColor = customColors.accent || '#1863d6';
+  let backgroundColor = customColors.background || '#f9f9f9';
+  let textColor = customColors.text || '#001f3d';
+  
+  // Specific theme color assignments
+  if (theme === 'mobile-optimized') {
+    primaryColor = customColors.primary || '#001f3d';
+    secondaryColor = customColors.secondary || '#1863d6';
+    accentColor = customColors.accent || '#0074d9';
+    backgroundColor = customColors.background || '#ffffff';
+    textColor = customColors.text || '#001f3d';
+  } else if (theme === 'accessibility-friendly') {
+    primaryColor = customColors.primary || '#001f3d';
+    secondaryColor = customColors.secondary || '#d9534f';
+    accentColor = customColors.accent || '#5cb85c';
+    backgroundColor = customColors.background || '#ffffff';
+    textColor = customColors.text || '#000000';
+  } else if (theme === 'dark-mode') {
+    primaryColor = customColors.primary || '#1a1a1a';
+    secondaryColor = customColors.secondary || '#2c2c2c';
+    accentColor = customColors.accent || '#4a90e2';
+    backgroundColor = customColors.background || '#0d0d0d';
+    textColor = customColors.text || '#e6e6e6';
+  }
+
+  return `* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: ${fontSize}px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  line-height: 1.6;
+  color: ${textColor};
+  background-color: ${backgroundColor};
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
   return `* {
   margin: 0;
   padding: 0;
@@ -1976,8 +2051,11 @@ app.use((req, res) => {
   });
 });
 
+// Initialize collaboration server
+const collaborationServer = new CollaborationServer(server);
+
 // Start server
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   const timestamp = new Date().toISOString();
   console.log(`\n${'='.repeat(60)}`);
   console.log(`🚀 Site Builder API Server`);

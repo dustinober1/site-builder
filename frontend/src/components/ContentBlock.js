@@ -1,6 +1,7 @@
 import React from 'react';
 import AssessmentBlock from './AssessmentBlock';
 import { DragAndDropBlock, HotspotBlock } from './InteractiveBlock';
+import InteractiveVideoBlock from './InteractiveVideoBlock';
 import './ContentBlock.css';
 
 function ContentBlock({
@@ -45,6 +46,16 @@ function ContentBlock({
         return (
           <div className="preview-hotspot">
             <HotspotBlock block={block} isPreview={true} />
+          </div>
+        );
+      case 'interactive-video':
+        return (
+          <div className="preview-interactive-video">
+            <InteractiveVideoBlock 
+              block={block} 
+              isPreview={true} 
+              onUpdateBlock={onUpdateBlock}
+            />
           </div>
         );
       case 'advanced-question':

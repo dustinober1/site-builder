@@ -777,6 +777,234 @@ function PropertiesPanel({ block, onUpdateBlock, onDelete }) {
           </>
         )}
 
+        {block.type === 'interactive-video' && (
+          <>
+            <div className="form-group">
+              <label htmlFor="video-url">Video URL</label>
+              <input
+                id="video-url"
+                type="text"
+                value={block.url || block.videoUrl || ''}
+                onChange={(e) => handleChange('url', e.target.value)}
+                placeholder="Enter video URL"
+                aria-label="Interactive video URL"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="video-title">Title</label>
+              <input
+                id="video-title"
+                type="text"
+                value={block.title || ''}
+                onChange={(e) => handleChange('title', e.target.value)}
+                placeholder="Enter video title"
+                aria-label="Interactive video title"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="video-description">Description</label>
+              <textarea
+                id="video-description"
+                value={block.description || ''}
+                onChange={(e) => handleChange('description', e.target.value)}
+                placeholder="Enter video description"
+                aria-label="Interactive video description"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Interactions</label>
+              <p>Define interactive elements that appear during the video:</p>
+              <div className="interactions-container">
+                {(block.interactions || []).map((interaction, idx) => (
+                  <div key={interaction.id || idx} className="interaction-input">
+                    <div className="interaction-header">
+                      <h4>Interaction {idx + 1}</h4>
+                      <button
+                        className="btn-small delete"
+                        onClick={() => {
+                          const newInteractions = block.interactions.filter((_, i) => i !== idx);
+                          handleChange('interactions', newInteractions);
+                        }}
+                        title="Remove interaction"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    
+                    <div className="interaction-fields">
+                      <div>
+                        <label htmlFor={`interaction-type-${idx}`}>Type</label>
+                        <select
+                          id={`interaction-type-${idx}`}
+                          value={interaction.type || 'quiz'}
+                          onChange={(e) => {
+                            const newInteractions = [...(block.interactions || [])];
+                            newInteractions[idx] = { ...newInteractions[idx], type: e.target.value };
+                            handleChange('interactions', newInteractions);
+                          }}
+                        >
+                          <option value="quiz">Quiz</option>
+                          <option value="checkpoint">Checkpoint</option>
+                        </select>
+                      </div>
+                      
+                      <div>
+                        <label htmlFor={`interaction-time-${idx}`}>Time (seconds)</label>
+                        <input
+                          id={`interaction-time-${idx}`}
+                          type="number"
+                          min="0"
+                          step="0.1"
+                          value={interaction.time || ''}
+                          onChange={(e) => {
+                            const newInteractions = [...(block.interactions || [])];
+                            newInteractions[idx] = { ...newInteractions[idx], time: parseFloat(e.target.value) };
+                            handleChange('interactions', newInteractions);
+                          }}
+                          placeholder="When to show this interaction"
+                        />
+                      </div>
+                      
+                      {interaction.type === 'quiz' && (
+                        <>
+                          <div>
+                            <label htmlFor={`interaction-question-${idx}`}>Question</label>
+                            <textarea
+                              id={`interaction-question-${idx}`}
+                              value={interaction.question || ''}
+                              onChange={(e) => {
+                                const newInteractions = [...(block.interactions || [])];
+                                newInteractions[idx] = { ...newInteractions[idx], question: e.target.value };
+                                handleChange('interactions', newInteractions);
+                              }}
+                              placeholder="Enter the question"
+                            />
+                          </div>
+                          
+                          <div>
+                            <label>Options</label>
+                            <div className="options-container">
+                              {(interaction.options || []).map((option, optIdx) => (
+                                <div key={optIdx} className="option-input">
+                                  <input
+                                    type="text"
+                                    value={option}
+                                    onChange={(e) => {
+                                      const newInteractions = [...(block.interactions || [])];
+                                      const newOptions = [...(newInteractions[idx].options || [])];
+                                      newOptions[optIdx] = e.target.value;
+                                      newInteractions[idx] = { ...newInteractions[idx], options: newOptions };
+                                      handleChange('interactions', newInteractions);
+                                    }}
+                                    placeholder={`Option ${optIdx + 1}`}
+                                  />
+                                  <button
+                                    className="btn-small delete"
+                                    onClick={() => {
+                                      const newInteractions = [...(block.interactions || [])];
+                                      const newOptions = newInteractions[idx].options.filter((_, i) => i !== optIdx);
+                                      newInteractions[idx] = { ...newInteractions[idx], options: newOptions };
+                                      handleChange('interactions', newInteractions);
+                                    }}
+                                    title="Remove option"
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                            <button
+                              className="btn-small"
+                              onClick={() => {
+                                const newInteractions = [...(block.interactions || [])];
+                                const newOptions = [...(newInteractions[idx].options || []), ''];
+                                newInteractions[idx] = { ...newInteractions[idx], options: newOptions };
+                                handleChange('interactions', newInteractions);
+                              }}
+                              title="Add another option"
+                            >
+                              + Add Option
+                            </button>
+                          </div>
+                          
+                          <div>
+                            <label htmlFor={`interaction-correctAnswer-${idx}`}>Correct Answer (Option Index)</label>
+                            <input
+                              id={`interaction-correctAnswer-${idx}`}
+                              type="number"
+                              min="0"
+                              max={(interaction.options || []).length - 1}
+                              value={interaction.correctAnswer || ''}
+                              onChange={(e) => {
+                                const newInteractions = [...(block.interactions || [])];
+                                newInteractions[idx] = { ...newInteractions[idx], correctAnswer: parseInt(e.target.value) };
+                                handleChange('interactions', newInteractions);
+                              }}
+                              placeholder="0"
+                            />
+                          </div>
+                        </>
+                      )}
+                      
+                      {interaction.type === 'checkpoint' && (
+                        <div>
+                          <label htmlFor={`interaction-message-${idx}`}>Message</label>
+                          <textarea
+                            id={`interaction-message-${idx}`}
+                            value={interaction.message || ''}
+                            onChange={(e) => {
+                              const newInteractions = [...(block.interactions || [])];
+                              newInteractions[idx] = { ...newInteractions[idx], message: e.target.value };
+                              handleChange('interactions', newInteractions);
+                            }}
+                            placeholder="Message to show at checkpoint"
+                          />
+                        </div>
+                      )}
+                      
+                      <div>
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={interaction.required === true}
+                            onChange={(e) => {
+                              const newInteractions = [...(block.interactions || [])];
+                              newInteractions[idx] = { ...newInteractions[idx], required: e.target.checked };
+                              handleChange('interactions', newInteractions);
+                            }}
+                          />
+                          Required to continue (for quizzes)
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <button
+                className="btn-small"
+                onClick={() => {
+                  const newInteractions = [...(block.interactions || []), {
+                    id: `interaction${Date.now()}`,
+                    type: 'quiz',
+                    time: 30,
+                    question: 'What did you just learn from this video?',
+                    options: ['Option A', 'Option B', 'Option C', 'Option D'],
+                    correctAnswer: 0,
+                    required: true
+                  }];
+                  handleChange('interactions', newInteractions);
+                }}
+                title="Add another interaction"
+              >
+                + Add Interaction
+              </button>
+            </div>
+          </>
+        )}
+
         <button
           className="delete-button"
           onClick={() => onDelete(block.id)}

@@ -1,0 +1,287 @@
+.gamification-panel {
+  padding: 1rem;
+  background-color: #f8f9ff;
+  border-radius: 8px;
+  border: 1px solid #e0e5ff;
+  margin-bottom: 1rem;
+}
+
+.gamification-panel h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: #001f3d;
+}
+
+.gamification-panel p {
+  margin-bottom: 1.5rem;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+  background-color: #1863d6;
+}
+
+input:checked + .toggle-slider:before {
+  transform: translateX(26px);
+}
+
+.toggle-label {
+  font-weight: 500;
+  color: #001f3d;
+}
+
+.gamification-settings {
+  border-top: 1px solid #e0e5ff;
+  padding-top: 1rem;
+}
+
+.settings-section {
+  margin-bottom: 1.5rem;
+}
+
+.settings-section h4 {
+  margin: 0 0 1rem 0;
+  color: #001f3d;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e0e5ff;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #001f3d;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.points-settings {
+  margin-top: 1rem;
+  padding-left: 1rem;
+}
+
+.badges-list {
+  margin-top: 1rem;
+}
+
+.badge-item {
+  border: 1px solid #e0e5ff;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background-color: white;
+}
+
+.badge-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.badge-icon input {
+  font-size: 1.5rem;
+  width: 50px;
+  text-align: center;
+  height: 40px;
+}
+
+.remove-badge-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.add-badge-btn {
+  padding: 0.5rem 1rem;
+  background-color: #1863d6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.add-badge-btn:hover {
+  background-color: #0a56c1;
+}
+
+.badge-details {
+  padding-left: 1rem;
+}
+
+.gamification-preview {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e5ff;
+}
+
+.gamification-preview h4 {
+  margin-bottom: 1rem;
+  color: #001f3d;
+}
+
+.preview-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.progress-example, .badges-example {
+  padding: 1rem;
+  background-color: #f8f9ff;
+  border-radius: 8px;
+}
+
+.progress-example h5, .badges-example h5 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #001f3d;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 20px;
+  background-color: #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #1863d6;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  text-align: center;
+  font-weight: 500;
+  color: #001f3d;
+}
+
+.badges-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.badge-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem;
+  background-color: white;
+  border: 1px solid #e0e5ff;
+  border-radius: 8px;
+  min-width: 60px;
+}
+
+.badge-preview .badge-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.badge-preview .badge-name {
+  font-size: 0.7rem;
+  text-align: center;
+  color: #001f3d;
+}
+
+.no-badges {
+  color: #6c757d;
+  font-style: italic;
+  text-align: center;
+  padding: 1rem;
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .preview-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .toggle-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}

@@ -1,125 +1,210 @@
 import React, { useState, useEffect } from 'react';
 import './AnalyticsDashboard.css';
 
-function AnalyticsDashboard({ project, blocks }) {
+const AnalyticsDashboard = ({ project, blocks }) => {
   const [analyticsData, setAnalyticsData] = useState({
-    totalBlocks: 0,
-    assessmentCount: 0,
-    completedAssessments: 0,
-    avgScore: 0,
+    pageViews: 0,
     timeSpent: 0,
-    engagementMetrics: {}
+    completionRate: 0,
+    assessmentScores: [],
+    engagementMetrics: {},
+    learnerProgress: []
   });
 
-  // Calculate analytics when blocks change
-  useEffect(() => {
-    const assessmentBlocks = blocks.filter(block => block.type === 'knowledge-check');
-    const completedAssessments = assessmentBlocks.filter(block => block.progress?.completed).length;
-    const totalScore = assessmentBlocks
-      .filter(block => block.progress?.score !== null)
-      .reduce((sum, block) => sum + (block.progress?.score || 0), 0);
-    
-    const avgScore = assessmentBlocks.length > 0 
-      ? Math.round(totalScore / assessmentBlocks.filter(block => block.progress?.score !== null).length) 
-      : 0;
+  const [timeRange, setTimeRange] = useState('7d'); // 7d, 30d, 90d
+  const [loading, setLoading] = useState(true);
 
-    setAnalyticsData({
-      totalBlocks: blocks.length,
-      assessmentCount: assessmentBlocks.length,
-      completedAssessments,
-      avgScore,
-      timeSpent: 0, // This would come from actual time tracking
-      engagementMetrics: {
-        assessmentCompletionRate: assessmentBlocks.length > 0 
-          ? Math.round((completedAssessments / assessmentBlocks.length) * 100) 
-          : 0
-      }
-    });
-  }, [blocks]);
+  // Simulate loading analytics data
+  useEffect(() => {
+    setLoading(true);
+    
+    // Simulate API call delay
+    setTimeout(() => {
+      // Generate mock analytics data based on project
+      const mockData = {
+        pageViews: Math.floor(Math.random() * 1000) + 50,
+        timeSpent: Math.floor(Math.random() * 200) + 30, // in minutes
+        completionRate: Math.floor(Math.random() * 100),
+        assessmentScores: Array.from({ length: 5 }, (_, i) => ({
+          id: i + 1,
+          title: `Assessment ${i + 1}`,
+          averageScore: Math.floor(Math.random() * 40) + 60, // 60-100%
+          attempts: Math.floor(Math.random() * 50) + 10
+        })),
+        engagementMetrics: {
+          activeLearners: Math.floor(Math.random() * 100) + 20,
+          returningLearners: Math.floor(Math.random() * 50) + 5,
+          averageSessionDuration: Math.floor(Math.random() * 30) + 15, // in minutes
+          pagesPerSession: (Math.random() * 5 + 2).toFixed(1)
+        },
+        learnerProgress: Array.from({ length: 5 }, (_, i) => ({
+          id: i + 1,
+          name: `Learner ${i + 1}`,
+          progress: Math.floor(Math.random() * 100),
+          timeSpent: Math.floor(Math.random() * 120),
+          lastActive: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString()
+        }))
+      };
+      
+      setAnalyticsData(mockData);
+      setLoading(false);
+    }, 1000);
+  }, [project, timeRange]);
+
+  const formatTime = (minutes) => {
+    const hrs = Math.floor(minutes / 60);
+    const mins = Math.floor(minutes % 60);
+    return hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+  };
+
+  const getCompletionColor = (rate) => {
+    if (rate >= 80) return '#28a745';
+    if (rate >= 60) return '#ffc107';
+    return '#dc3545';
+  };
+
+  const ChartPlaceholder = ({ title, data }) => (
+    <div className="chart-container">
+      <h4>{title}</h4>
+      <div className="chart-placeholder">
+        <div className="chart-bar" style={{ height: '60%', width: '30%' }}></div>
+        <div className="chart-bar" style={{ height: '80%', width: '30%' }}></div>
+        <div className="chart-bar" style={{ height: '45%', width: '30%' }}></div>
+      </div>
+    </div>
+  );
+
+  if (loading) {
+    return (
+      <div className="analytics-dashboard loading">
+        <div className="loading-spinner"></div>
+        <p>Loading analytics data...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="analytics-dashboard">
       <div className="dashboard-header">
-        <h2>Learning Analytics</h2>
-        <p>Track progress and performance for "{project.name}"</p>
-      </div>
-      
-      <div className="dashboard-grid">
-        <div className="metric-card">
-          <div className="metric-value">{analyticsData.totalBlocks}</div>
-          <div className="metric-label">Total Content Blocks</div>
-        </div>
-        
-        <div className="metric-card">
-          <div className="metric-value">{analyticsData.assessmentCount}</div>
-          <div className="metric-label">Assessments</div>
-        </div>
-        
-        <div className="metric-card">
-          <div className="metric-value">{analyticsData.completedAssessments}/{analyticsData.assessmentCount}</div>
-          <div className="metric-label">Completed Assessments</div>
-        </div>
-        
-        <div className="metric-card">
-          <div className="metric-value">{analyticsData.avgScore}%</div>
-          <div className="metric-label">Average Score</div>
-        </div>
-        
-        <div className="metric-card">
-          <div className="metric-value">{analyticsData.engagementMetrics.assessmentCompletionRate}%</div>
-          <div className="metric-label">Assessment Completion Rate</div>
+        <h3>Analytics Dashboard</h3>
+        <div className="time-range-selector">
+          <select value={timeRange} onChange={(e) => setTimeRange(e.target.value)}>
+            <option value="7d">Last 7 days</option>
+            <option value="30d">Last 30 days</option>
+            <option value="90d">Last 90 days</option>
+          </select>
         </div>
       </div>
-      
-      <div className="detailed-analytics">
-        <h3>Detailed Assessment Performance</h3>
-        <div className="assessment-list">
-          {blocks
-            .filter(block => block.type === 'knowledge-check')
-            .map((block, index) => (
-              <div key={block.id} className="assessment-item">
-                <div className="assessment-info">
-                  <div className="assessment-question">
-                    {block.question || `Assessment ${index + 1}`}
-                  </div>
-                  <div className="assessment-type">
-                    {block.questionType || 'Multiple Choice'}
-                  </div>
-                </div>
-                <div className="assessment-stats">
-                  {block.progress?.completed ? (
-                    <span className="status completed">
-                      ✓ Completed - {block.progress.score}%
-                    </span>
-                  ) : (
-                    <span className="status pending">○ Pending</span>
-                  )}
+
+      <div className="overview-metrics">
+        <div className="metric-card">
+          <div className="metric-value">{analyticsData.pageViews.toLocaleString()}</div>
+          <div className="metric-label">Page Views</div>
+        </div>
+        <div className="metric-card">
+          <div className="metric-value">{formatTime(analyticsData.timeSpent)}</div>
+          <div className="metric-label">Total Time Spent</div>
+        </div>
+        <div className="metric-card">
+          <div 
+            className="metric-value" 
+            style={{ color: getCompletionColor(analyticsData.completionRate) }}
+          >
+            {analyticsData.completionRate}%
+          </div>
+          <div className="metric-label">Completion Rate</div>
+        </div>
+        <div className="metric-card">
+          <div className="metric-value">{analyticsData.engagementMetrics.activeLearners}</div>
+          <div className="metric-label">Active Learners</div>
+        </div>
+      </div>
+
+      <div className="engagement-section">
+        <h4>Engagement Metrics</h4>
+        <div className="engagement-grid">
+          <div className="engagement-item">
+            <div className="engagement-value">{analyticsData.engagementMetrics.returningLearners}</div>
+            <div className="engagement-label">Returning Learners</div>
+          </div>
+          <div className="engagement-item">
+            <div className="engagement-value">{analyticsData.engagementMetrics.averageSessionDuration}m</div>
+            <div className="engagement-label">Avg. Session</div>
+          </div>
+          <div className="engagement-item">
+            <div className="engagement-value">{analyticsData.engagementMetrics.pagesPerSession}</div>
+            <div className="engagement-label">Pages/Session</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="charts-section">
+        <ChartPlaceholder title="Page Views Over Time" />
+        <ChartPlaceholder title="Assessment Scores" />
+      </div>
+
+      <div className="assessments-section">
+        <h4>Assessment Performance</h4>
+        <div className="assessments-list">
+          {analyticsData.assessmentScores.map(assessment => (
+            <div key={assessment.id} className="assessment-item">
+              <div className="assessment-info">
+                <div className="assessment-title">{assessment.title}</div>
+                <div className="assessment-details">
+                  <span>{assessment.attempts} attempts</span>
+                  <span className="score" style={{ color: getCompletionColor(assessment.averageScore) }}>
+                    {assessment.averageScore}%
+                  </span>
                 </div>
               </div>
-            ))
-          }
+              <div className="assessment-progress">
+                <div 
+                  className="progress-bar" 
+                  style={{ width: `${assessment.averageScore}%` }}
+                ></div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
-      
-      <div className="recommendations">
-        <h3>Learning Recommendations</h3>
+
+      <div className="learners-section">
+        <h4>Learner Progress</h4>
+        <div className="learners-list">
+          {analyticsData.learnerProgress.map(learner => (
+            <div key={learner.id} className="learner-item">
+              <div className="learner-info">
+                <div className="learner-name">{learner.name}</div>
+                <div className="learner-details">
+                  <span>{formatTime(learner.timeSpent)} spent</span>
+                  <span>Active: {new Date(learner.lastActive).toLocaleDateString()}</span>
+                </div>
+              </div>
+              <div className="learner-progress">
+                <div className="progress-text">{learner.progress}%</div>
+                <div className="progress-bar">
+                  <div 
+                    className="progress-fill" 
+                    style={{ width: `${learner.progress}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="insights-section">
+        <h4>Key Insights</h4>
         <ul>
-          {analyticsData.engagementMetrics.assessmentCompletionRate < 50 && (
-            <li>Consider reviewing the material before attempting assessments</li>
-          )}
-          {analyticsData.avgScore < 70 && (
-            <li>Focus on areas where scores are below 70%</li>
-          )}
-          {analyticsData.assessmentCount === 0 && (
-            <li>Add knowledge check assessments to evaluate learning</li>
-          )}
-          {analyticsData.completedAssessments > 0 && analyticsData.avgScore >= 80 && (
-            <li>Great progress! Consider advancing to the next module</li>
-          )}
+          <li>{analyticsData.completionRate > 70 ? 'High completion rate indicates engaging content' : 'Consider improving content engagement'}</li>
+          <li>Average session duration of {analyticsData.engagementMetrics.averageSessionDuration} minutes shows good learner retention</li>
+          <li>{analyticsData.engagementMetrics.pagesPerSession} pages per session indicates learners are exploring thoroughly</li>
+          <li>Assessment scores average {analyticsData.assessmentScores.reduce((sum, a) => sum + a.averageScore, 0) / analyticsData.assessmentScores.length}%</li>
         </ul>
       </div>
     </div>
   );
-}
+};
 
 export default AnalyticsDashboard;

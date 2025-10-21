@@ -1,0 +1,160 @@
+.theme-manager {
+  padding: 1rem;
+  background-color: #f8f9ff;
+  border-radius: 8px;
+  border: 1px solid #e0e5ff;
+  margin-bottom: 1rem;
+}
+
+.theme-manager h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: #001f3d;
+}
+
+.theme-manager p {
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.theme-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.theme-option {
+  border: 2px solid #e0e5ff;
+  border-radius: 8px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: white;
+}
+
+.theme-option:hover {
+  border-color: #1863d6;
+  box-shadow: 0 2px 8px rgba(24, 99, 214, 0.2);
+}
+
+.theme-option.selected {
+  border-color: #1863d6;
+  background-color: #f0f7ff;
+  box-shadow: 0 2px 8px rgba(24, 99, 214, 0.3);
+}
+
+.theme-preview {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.color-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.theme-info h4 {
+  margin: 0 0 0.25rem 0;
+  color: #001f3d;
+  font-size: 1rem;
+}
+
+.theme-info p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.custom-colors {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e5ff;
+}
+
+.custom-colors h4 {
+  margin-bottom: 1rem;
+  color: #001f3d;
+}
+
+.color-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.color-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.color-control label {
+  font-size: 0.9rem;
+  color: #001f3d;
+}
+
+.color-control input[type="color"] {
+  height: 36px;
+  border: 1px solid #b6cbe1;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.mobile-optimization {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e5ff;
+}
+
+.mobile-optimization h4 {
+  margin-bottom: 1rem;
+  color: #001f3d;
+}
+
+.mobile-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.setting {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.setting input[type="checkbox"] {
+  transform: scale(1.2);
+}
+
+.setting input[type="range"] {
+  flex: 1;
+  margin-left: 1rem;
+  max-width: 200px;
+}
+
+@media (max-width: 768px) {
+  .theme-options {
+    grid-template-columns: 1fr;
+  }
+  
+  .color-controls {
+    grid-template-columns: 1fr;
+  }
+  
+  .setting {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  
+  .setting input[type="range"] {
+    margin-left: 0;
+    width: 100%;
+  }
+}

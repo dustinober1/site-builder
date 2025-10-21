@@ -10,6 +10,12 @@ import AnalyticsDashboard from './AnalyticsDashboard';
 import TemplateLibrary from './TemplateLibrary';
 import SmartSuggestions from './SmartSuggestions';
 import PublishingPanel from './PublishingPanel';
+import ThemeManager from './ThemeManager';
+import CollaborationPanel from './CollaborationPanel';
+import AISettings from './AISettings';
+import GamificationPanel from './GamificationPanel';
+import OfflineSyncManager from './OfflineSyncManager';
+import AccessibilityChecker from './AccessibilityChecker';
 import { autoSaveProject, saveProject } from '../utils/projectStorage';
 import axios from 'axios';
 
@@ -140,6 +146,29 @@ function Editor({ project, onBack }) {
       default:
         newBlock = { ...newBlock, content: `New ${type}` };
     }
+    
+    if (type === 'interactive-video') {
+      newBlock = {
+        ...newBlock,
+        type: 'interactive-video',
+        title: 'Interactive Video',
+        url: '', // Video URL
+        description: 'Interactive video description',
+        interactions: [
+          {
+            id: 'quiz1',
+            type: 'quiz',
+            time: 30, // seconds
+            question: 'What did you just learn from this video?',
+            options: ['Option A', 'Option B', 'Option C', 'Option D'],
+            correctAnswer: 0,
+            feedback: 'Great job!',
+            required: true
+          }
+        ]
+      };
+    }
+    }
 
     setBlocks([...blocks, newBlock]);
     setSelectedBlockId(newBlock.id);
@@ -150,6 +179,13 @@ function Editor({ project, onBack }) {
       block.id === blockId ? { ...block, ...updates } : block
     ));
   }, [blocks]);
+
+  const handleUpdateProject = useCallback((updatedProject) => {
+    // Update the project in the parent state
+    setCurrentProject(updatedProject);
+    // Save the updated project
+    saveProject(updatedProject);
+  }, []);
 
   const handleDeleteBlock = useCallback((blockId) => {
     setBlocks(blocks.filter(block => block.id !== blockId));
@@ -312,6 +348,7 @@ function Editor({ project, onBack }) {
               onSelectBlock={setSelectedBlockId}
               onDeleteBlock={handleDeleteBlock}
               onMoveBlock={handleMoveBlock}
+              onUpdateBlock={handleUpdateBlock}
             />
           </div>
           <div className="sidebar-panel">
@@ -325,9 +362,35 @@ function Editor({ project, onBack }) {
               }}
             />
             <SmartSuggestions
+              project={project}
               currentPage={currentPage}
               blocks={blocks}
               onSuggestionAccept={handleSuggestionAccept}
+            />
+            <ThemeManager
+              project={project}
+              onUpdateProject={handleUpdateProject}
+            />
+            <CollaborationPanel
+              project={project}
+              onCollaborationUpdate={() => {}}
+            />
+            <AISettings
+              project={project}
+              onUpdateProject={handleUpdateProject}
+            />
+            <GamificationPanel
+              project={project}
+              onUpdateProject={handleUpdateProject}
+            />
+            <OfflineSyncManager
+              project={project}
+              onUpdateProject={handleUpdateProject}
+            />
+            <AccessibilityChecker
+              project={project}
+              currentPage={currentPage}
+              blocks={blocks}
             />
             <div className="panel-tabs">
               <button 
