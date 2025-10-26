@@ -8,23 +8,19 @@ require('dotenv').config();
 
 const scormCompliance = require('./scorm-compliance');
 const CollaborationServer = require('./collaboration');
+const logger = require('./config/logger');
+const { validators } = require('./middleware/validation');
+const securityMiddleware = require('./middleware/security');
 
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 5000;
 
-// Logging Middleware
-const logger = (req, res, next) => {
-  const timestamp = new Date().toISOString();
-  console.log(`[${timestamp}] ${req.method} ${req.url}`);
-  next();
-};
-
 // Error Handler Middleware
 const errorHandler = (err, req, res, next) => {
   const timestamp = new Date().toISOString();
-  console.error(`[${timestamp}] ERROR:`, err.message);
-  console.error(err.stack);
+  logger.error(`[${timestamp}] ERROR:`, err.message);
+  logger.error(err.stack);
   
   res.status(err.status || 500).json({
     success: false,
@@ -36,48 +32,18 @@ const errorHandler = (err, req, res, next) => {
   });
 };
 
-// Request Validator Middleware
-const validateRequest = (schema) => {
-  return (req, res, next) => {
-    const errors = [];
-    
-    for (const [field, rules] of Object.entries(schema)) {
-      const value = req.body[field];
-      
-      if (rules.required && !value) {
-        errors.push(`Field '${field}' is required`);
-      }
-      
-      if (rules.type && value && typeof value !== rules.type) {
-        errors.push(`Field '${field}' must be of type ${rules.type}`);
-      }
-      
-      if (rules.minLength && value && value.length < rules.minLength) {
-        errors.push(`Field '${field}' must be at least ${rules.minLength} characters`);
-      }
-    }
-    
-    if (errors.length > 0) {
-      return res.status(400).json({
-        success: false,
-        error: {
-          message: 'Validation failed',
-          details: errors
-        }
-      });
-    }
-    
-    next();
-  };
-};
-
 // Middleware
+app.use(securityMiddleware.helmet);
+app.use(securityMiddleware.sanitizeInput);
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-app.use(logger);
+app.use(logger.httpLogger);
 app.use('/uploads', express.static('uploads'));
 app.use('/sites', express.static('../output-sites'));
+
+// Apply rate limiting
+app.use(securityMiddleware.rateLimiters.general);
 
 // Multer configuration
 const storage = multer.diskStorage({
@@ -141,7 +107,7 @@ app.post('/api/upload/image', upload.single('image'), (req, res, next) => {
       });
     }
     
-    console.log(`Image uploaded successfully: ${req.file.filename}`);
+    logger.info(`Image uploaded successfully: ${req.file.filename}`);
     
     res.json({
       success: true,
@@ -171,7 +137,7 @@ app.post('/api/upload/video', upload.single('video'), (req, res, next) => {
       });
     }
     
-    console.log(`Video uploaded successfully: ${req.file.filename}`);
+    logger.info(`Video uploaded successfully: ${req.file.filename}`);
     
     res.json({
       success: true,
@@ -189,10 +155,7 @@ app.post('/api/upload/video', upload.single('video'), (req, res, next) => {
 });
 
 // Generate static site from page data
-app.post('/api/generate/site', validateRequest({
-  projectName: { required: true, type: 'string', minLength: 1 },
-  pages: { required: true, type: 'object' }
-}), (req, res, next) => {
+app.post('/api/generate/site', validators.project, (req, res, next) => {
   try {
     const { projectName, pages, theme, mobileOptimized, fontSize, customColors } = req.body;
     const projectSettings = {
@@ -211,7 +174,7 @@ app.post('/api/generate/site', validateRequest({
       });
     }
 
-    console.log(`Generating site for project: ${projectName}`);
+    logger.info(`Generating site for project: ${projectName}`);
 
     const outputDir = path.join(process.env.OUTPUT_DIR || '../output-sites', projectName);
     if (!fs.existsSync(outputDir)) {
@@ -226,7 +189,7 @@ app.post('/api/generate/site', validateRequest({
         path.join(outputDir, `${filename}.html`),
         htmlContent
       );
-      console.log(`Generated page: ${filename}.html`);
+      logger.info(`Generated page: ${filename}.html`);
     });
 
     // Generate index page
@@ -243,7 +206,7 @@ app.post('/api/generate/site', validateRequest({
       cssContent
     );
 
-    console.log(`Site generated successfully at: ${outputDir}`);
+    logger.info(`Site generated successfully at: ${outputDir}`);
 
     res.json({
       success: true,
@@ -261,7 +224,7 @@ app.post('/api/generate/site', validateRequest({
 });
 
 // Generate SCORM 1.2 package
-app.post('/api/generate/scorm-12', (req, res) => {
+app.post('/api/generate/scorm-12', (req, res, next) => {
   try {
     const { projectName, pages } = req.body;
     
@@ -289,7 +252,7 @@ app.post('/api/generate/scorm-12', (req, res) => {
 
     // Generate pages with SCORM wrapper
     pages.forEach((page, index) => {
-      const htmlContent = generateHTML(page, projectName, pages, projectSettings);
+      const htmlContent = generateHTML(page, projectName, pages, {});
       const filename = page.slug || `page-${index}`;
       fs.writeFileSync(
         path.join(outputDir, `${filename}.html`),
@@ -305,7 +268,7 @@ app.post('/api/generate/scorm-12', (req, res) => {
     );
 
     // Copy CSS
-    const cssContent = generateCSS(projectSettings);
+    const cssContent = generateCSS({});
     fs.writeFileSync(
       path.join(outputDir, 'styles.css'),
       cssContent
@@ -319,13 +282,13 @@ app.post('/api/generate/scorm-12', (req, res) => {
       scormVersion: '1.2'
     });
   } catch (error) {
-    console.error('Error generating SCORM 1.2 package:', error);
-    res.status(500).json({ error: error.message });
+    logger.error('Error generating SCORM 1.2 package:', error);
+    next(error);
   }
 });
 
 // Generate SCORM 2004 package
-app.post('/api/generate/scorm-2004', (req, res) => {
+app.post('/api/generate/scorm-2004', (req, res, next) => {
   try {
     const { projectName, pages } = req.body;
     
@@ -353,7 +316,7 @@ app.post('/api/generate/scorm-2004', (req, res) => {
 
     // Generate pages
     pages.forEach((page, index) => {
-      const htmlContent = generateHTML(page, projectName, pages, projectSettings);
+      const htmlContent = generateHTML(page, projectName, pages, {});
       const filename = page.slug || `page-${index}`;
       fs.writeFileSync(
         path.join(outputDir, `${filename}.html`),
@@ -369,7 +332,7 @@ app.post('/api/generate/scorm-2004', (req, res) => {
     );
 
     // Copy CSS
-    const cssContent = generateCSS(projectSettings);
+    const cssContent = generateCSS({});
     fs.writeFileSync(
       path.join(outputDir, 'styles.css'),
       cssContent
@@ -383,13 +346,13 @@ app.post('/api/generate/scorm-2004', (req, res) => {
       scormVersion: '2004'
     });
   } catch (error) {
-    console.error('Error generating SCORM 2004 package:', error);
-    res.status(500).json({ error: error.message });
+    logger.error('Error generating SCORM 2004 package:', error);
+    next(error);
   }
 });
 
 // Hosted publishing endpoint
-app.post('/api/publish/hosted', async (req, res) => {
+app.post('/api/publish/hosted', async (req, res, next) => {
   try {
     const { projectName, pages, customDomain, password, theme, mobileOptimized, fontSize, customColors } = req.body;
     const projectSettings = {
@@ -412,7 +375,7 @@ app.post('/api/publish/hosted', async (req, res) => {
     // 3. Configure password protection if requested
     // 4. Return a public URL
     
-    // For now, we'll simulate the process
+    // For now, we'll simulate process
     const outputDir = path.join(process.env.OUTPUT_DIR || '../output-sites', `${projectName}-hosted`);
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
@@ -463,16 +426,13 @@ app.post('/api/publish/hosted', async (req, res) => {
       passwordProtected: !!password
     });
   } catch (error) {
-    console.error('Error publishing course:', error);
-    res.status(500).json({ 
-      success: false,
-      error: error.message 
-    });
+    logger.error('Error publishing course:', error);
+    next(error);
   }
 });
 
 // Generate xAPI package
-app.post('/api/generate/xapi', (req, res) => {
+app.post('/api/generate/xapi', (req, res, next) => {
   try {
     const { projectName, pages, theme, mobileOptimized, fontSize, customColors } = req.body;
     const projectSettings = {
@@ -533,8 +493,8 @@ app.post('/api/generate/xapi', (req, res) => {
       xapiVersion: '1.0.3'
     });
   } catch (error) {
-    console.error('Error generating xAPI package:', error);
-    res.status(500).json({ error: error.message });
+    logger.error('Error generating xAPI package:', error);
+    next(error);
   }
 });
 
@@ -571,7 +531,7 @@ function generateHTML(page, projectName, allPages = [], projectSettings = {}) {
         if (checkPrerequisites(url, prereqIds)) {
           window.location.href = url;
         } else {
-          alert('You must complete the prerequisite pages first.');
+          alert('You must complete prerequisite pages first.');
         }
       } else {
         window.location.href = url;
@@ -620,7 +580,7 @@ function generateHTML(page, projectName, allPages = [], projectSettings = {}) {
             id: window.location.href,
             definition: {
               name: { 'en-US': '${escapeHtml(page.title)}' },
-              description: { 'en-US': 'A page in the ${escapeHtml(projectName)} course' },
+              description: { 'en-US': 'A page in ${escapeHtml(projectName)} course' },
               type: 'http://adlnet.gov/expapi/activities/lesson'
             }
           }
@@ -753,7 +713,7 @@ function generateIndex(pages, projectName, projectSettings = {}) {
         if (checkPrerequisites(url, prereqIds)) {
           window.location.href = url;
         } else {
-          alert('You must complete the prerequisite pages first.');
+          alert('You must complete prerequisite pages first.');
         }
       } else {
         window.location.href = url;
@@ -860,7 +820,7 @@ function generateAssessmentBlock(block) {
             <h3>${escapedQuestion}</h3>
             <span class="question-type">Multiple Choice</span>
           </div>
-          <form class="assessment-form" onsubmit="handleAssessmentSubmit(event, ${JSON.stringify(correctAnswer).replace(/"/g, '&quot;')})">
+          <form class="assessment-form" onsubmit="handleAssessmentSubmit(event, '${JSON.stringify(correctAnswer).replace(/'/g, "\\'")}')">
             <div class="assessment-options">
               ${(options || []).map((opt, idx) => `
                 <div class="option-item">
@@ -986,7 +946,7 @@ function generateAssessmentBlock(block) {
         let userAnswer;
         let isCorrect = false;
         
-        // Determine the user's answer based on question type
+        // Determine user's answer based on question type
         if (Array.isArray(correctAnswer)) {
           // Matching question - collect all selections
           userAnswer = [];
@@ -1034,7 +994,7 @@ function generateAssessmentBlock(block) {
 function generateDragAndDropBlock(block) {
   const { question, items = [], targets = [], correctMapping = {}, correctFeedback, incorrectFeedback } = block;
   
-  const escapedQuestion = escapeHtml(question || 'Drag the items to the correct targets');
+  const escapedQuestion = escapeHtml(question || 'Drag items to correct targets');
   const escapedCorrectFeedback = escapeHtml(correctFeedback || 'Perfect! All items matched correctly.');
   const escapedIncorrectFeedback = escapeHtml(incorrectFeedback || 'Some matches need correction.');
   
@@ -1091,7 +1051,7 @@ function generateDragAndDropBlock(block) {
       </div>
       
       <div class="interactive-actions">
-        <button class="submit-btn" onclick="checkDragAndDrop('${escapeHtml(JSON.stringify(correctMapping).replace(/'/g, '&apos;'))}')">Submit Answer</button>
+        <button class="submit-btn" onclick="checkDragAndDrop('${escapeHtml(JSON.stringify(correctMapping).replace(/'/g, "\\'"))}')">Submit Answer</button>
         <button class="reset-btn" onclick="resetDragAndDrop()">Reset</button>
       </div>
       
@@ -1102,6 +1062,7 @@ function generateDragAndDropBlock(block) {
     
     <script>
       let dragData = {};
+      const correctMapping${block.id.replace(/-/g, '_')} = ${JSON.stringify(correctMapping || {})};
       
       function dragStart(e, id) {
         e.dataTransfer.setData("text", id);
@@ -1120,7 +1081,7 @@ function generateDragAndDropBlock(block) {
       }
       
       function checkDragAndDrop(correctMappingStr) {
-        const correctMapping = JSON.parse(correctMappingStr.replace(/&apos;/g, "'"));
+        const correctMapping = JSON.parse(correctMappingStr.replace(/\\'/g, "'"));
         let correctCount = 0;
         const total = Object.keys(correctMapping).length;
         const responses = [];
@@ -1139,7 +1100,7 @@ function generateDragAndDropBlock(block) {
         
         // Track drag and drop with xAPI
         const isCorrect = correctCount === total;
-        trackAssessmentInteraction('draganddrop-${block.id}', responses.join('|'), isCorrect);
+        trackAssessmentInteraction('dragandrop-${block.id}', responses.join('|'), isCorrect);
         
         const feedbackContainer = document.querySelector('.feedback-container');
         const feedbackElement = feedbackContainer.querySelector('.feedback');
@@ -1172,7 +1133,7 @@ function generateDragAndDropBlock(block) {
 function generateHotspotBlock(block) {
   const { question, imageUrl, alt, hotspots = [], correctHotspot, correctFeedback, incorrectFeedback } = block;
   
-  const escapedQuestion = escapeHtml(question || 'Click on the correct area in the image');
+  const escapedQuestion = escapeHtml(question || 'Click on correct area in image');
   const escapedImageUrl = escapeHtml(imageUrl || '');
   const escapedAlt = escapeHtml(alt || 'Interactive image');
   const escapedCorrectFeedback = escapeHtml(correctFeedback || 'Correct! You identified the right area.');
@@ -1316,26 +1277,6 @@ body {
   line-height: 1.6;
   color: ${textColor};
   background-color: ${backgroundColor};
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-  return `* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-  font-size: 16px;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  line-height: 1.6;
-  color: #001f3d;
-  background-color: #f9f9f9;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -2029,10 +1970,10 @@ footer p {
 function escapeHtml(text) {
   if (!text) return '';
   return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
+    .replace(/&/g, '&')
+    .replace(/</g, '<')
+    .replace(/>/g, '>')
+    .replace(/"/g, '"')
     .replace(/'/g, '&#039;');
 }
 
@@ -2057,11 +1998,11 @@ const collaborationServer = new CollaborationServer(server);
 // Start server
 server.listen(PORT, () => {
   const timestamp = new Date().toISOString();
-  console.log(`\n${'='.repeat(60)}`);
-  console.log(`🚀 Site Builder API Server`);
-  console.log(`${'='.repeat(60)}`);
-  console.log(`📍 URL: http://localhost:${PORT}`);
-  console.log(`⏰ Started: ${timestamp}`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`${'='.repeat(60)}\n`);
+  logger.info(`\n${'='.repeat(60)}`);
+  logger.info(`🚀 Site Builder API Server`);
+  logger.info(`${'='.repeat(60)}`);
+  logger.info(`📍 URL: http://localhost:${PORT}`);
+  logger.info(`⏰ Started: ${timestamp}`);
+  logger.info(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  logger.info(`${'='.repeat(60)}\n`);
 });
