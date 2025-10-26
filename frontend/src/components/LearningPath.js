@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import './LearningPath.css';
 
-function LearningPath({ project, currentPage, blocks, onNavigate }) {
+function LearningPath({ project, currentPage, blocks, onNavigate, onUpdateProject }) {
   const [expandedPages, setExpandedPages] = useState({});
+  const [editingPrerequisites, setEditingPrerequisites] = useState(null);
+  const [newPrerequisites, setNewPrerequisites] = useState([]);
 
   // Check if current page is available based on prerequisites
   const isPageAvailable = (pageIndex) => {
@@ -18,6 +20,51 @@ function LearningPath({ project, currentPage, blocks, onNavigate }) {
       const prereqPage = project.pages.find(p => p.id === prereqPageId);
       return prereqPage && prereqPage.completed;
     });
+  };
+
+  // Get available prerequisite pages (pages that come before this page)
+  const getAvailablePrerequisites = (pageIndex) => {
+    return project.pages.slice(0, pageIndex).filter((page, idx) => idx !== pageIndex);
+  };
+
+  // Handle prerequisite editing
+  const startEditingPrerequisites = (pageIndex) => {
+    const page = project.pages[pageIndex];
+    const currentPrereqs = page.prerequisites || [];
+    setNewPrerequisites(currentPrereqs);
+    setEditingPrerequisites(pageIndex);
+  };
+
+  const savePrerequisites = (pageIndex) => {
+    const updatedPages = project.pages.map((page, idx) => {
+      if (idx === pageIndex) {
+        return { ...page, prerequisites: newPrerequisites };
+      }
+      return page;
+    });
+
+    const updatedProject = {
+      ...project,
+      pages: updatedPages
+    };
+
+    if (onUpdateProject) {
+      onUpdateProject(updatedProject);
+    }
+
+    setEditingPrerequisites(null);
+  };
+
+  const cancelEditing = () => {
+    setEditingPrerequisites(null);
+  };
+
+  const togglePrerequisite = (prereqPageId) => {
+    if (newPrerequisites.includes(prereqPageId)) {
+      setNewPrerequisites(newPrerequisites.filter(id => id !== prereqPageId));
+    } else {
+      setNewPrerequisites([...newPrerequisites, prereqPageId]);
+    }
   };
 
   // Check if current page is completed
@@ -117,6 +164,51 @@ function LearningPath({ project, currentPage, blocks, onNavigate }) {
                         </li>
                       ))}
                     </ul>
+                  </div>
+
+                  <div className="prerequisites-section">
+                    <h4>Prerequisites</h4>
+                    {editingPrerequisites === index ? (
+                      <div className="prerequisite-editor">
+                        <div className="prereq-options">
+                          {getAvailablePrerequisites(index).map((prereqPage, prereqIndex) => (
+                            <label key={prereqPage.id} className="prereq-option">
+                              <input
+                                type="checkbox"
+                                checked={newPrerequisites.includes(prereqPage.id)}
+                                onChange={() => togglePrerequisite(prereqPage.id)}
+                              />
+                              <span>{prereqIndex + 1}. {prereqPage.title}</span>
+                            </label>
+                          ))}
+                        </div>
+                        <div className="prereq-actions">
+                          <button onClick={() => savePrerequisites(index)}>Save</button>
+                          <button onClick={cancelEditing}>Cancel</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="prerequisite-list">
+                        {page.prerequisites && page.prerequisites.length > 0 ? (
+                          page.prerequisites.map(prereqId => {
+                            const prereqPage = project.pages.find(p => p.id === prereqId);
+                            return prereqPage ? (
+                              <div key={prereqId} className="prereq-item">
+                                {prereqPage.title}
+                              </div>
+                            ) : null;
+                          })
+                        ) : (
+                          <div className="no-prereqs">No prerequisites set</div>
+                        )}
+                        <button 
+                          className="edit-prereqs-btn"
+                          onClick={() => startEditingPrerequisites(index)}
+                        >
+                          Edit Prerequisites
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

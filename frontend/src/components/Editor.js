@@ -16,6 +16,8 @@ import AISettings from './AISettings';
 import GamificationPanel from './GamificationPanel';
 import OfflineSyncManager from './OfflineSyncManager';
 import AccessibilityChecker from './AccessibilityChecker';
+import LearningObjectRepository from './LearningObjectRepository';
+import QuestionBank from './QuestionBank';
 import { autoSaveProject, saveProject } from '../utils/projectStorage';
 import axios from 'axios';
 
@@ -32,6 +34,8 @@ function Editor({ project, onBack }) {
   const [activeTab, setActiveTab] = useState('properties');
   const [showTemplateLibrary, setShowTemplateLibrary] = useState(false);
   const [showPublishingPanel, setShowPublishingPanel] = useState(false);
+  const [showLearningObjectRepo, setShowLearningObjectRepo] = useState(false);
+  const [showQuestionBank, setShowQuestionBank] = useState(false);
 
   // Auto-save project when blocks change
   useEffect(() => {
@@ -251,6 +255,70 @@ function Editor({ project, onBack }) {
     setBlocks([...blocks, newBlock]);
   }, [blocks]);
 
+  const handleInsertLearningObject = useCallback((object) => {
+    // Create a new block based on the learning object
+    let newBlock = {
+      id: Date.now(),
+      alt: object.description,
+      title: object.title,
+      url: object.url
+    };
+
+    // Determine block type based on object type
+    switch(object.type) {
+      case 'image':
+        newBlock.type = 'image';
+        break;
+      case 'video':
+        newBlock.type = 'video';
+        break;
+      case 'document':
+        newBlock.type = 'text';
+        newBlock.content = `<a href="${object.url}" target="_blank">${object.title}</a> - ${object.description}`;
+        break;
+      case 'scorm':
+        newBlock.type = 'text';
+        newBlock.content = `<iframe src="${object.url}" width="100%" height="400px"></iframe>`;
+        break;
+      default:
+        newBlock.type = 'text';
+        newBlock.content = `[Learning Object: ${object.title}] ${object.description}`;
+    }
+
+    setBlocks([...blocks, newBlock]);
+    setShowLearningObjectRepo(false);
+  }, [blocks]);
+
+  const handleInsertQuestion = useCallback((question) => {
+    // Create a new assessment block based on the question
+    const newBlock = {
+      id: Date.now(),
+      type: 'knowledge-check',
+      question: question.question,
+      questionType: question.type,
+      options: question.options,
+      correctAnswer: question.correctAnswer,
+      feedback: question.explanation || '',
+      correctFeedback: 'Correct!',
+      incorrectFeedback: 'Please try again.',
+      alt: '',
+      title: '',
+      url: ''
+    };
+
+    // For specific question types, set appropriate properties
+    if (question.type === 'fill-in-the-blank') {
+      newBlock.correctAnswer = question.correctAnswer;
+    } else if (question.type === 'matching') {
+      newBlock.items = question.items;
+      newBlock.choices = question.choices;
+      newBlock.correctAnswer = question.correctAnswer;
+    }
+
+    setBlocks([...blocks, newBlock]);
+    setShowQuestionBank(false);
+  }, [blocks]);
+
   const selectedBlock = blocks.find(b => b.id === selectedBlockId);
 
   return (
@@ -294,6 +362,20 @@ function Editor({ project, onBack }) {
             🚀 Publish
           </button>
           <button
+            className="repository-button"
+            onClick={() => setShowLearningObjectRepo(true)}
+            aria-label="Open learning object repository"
+          >
+            📚 Repository
+          </button>
+          <button
+            className="questions-button"
+            onClick={() => setShowQuestionBank(true)}
+            aria-label="Open question bank"
+          >
+            ❓ Questions
+          </button>
+          <button
             className="preview-button"
             onClick={() => setIsPreviewOpen(true)}
             aria-label="Preview the course before exporting"
@@ -329,6 +411,22 @@ function Editor({ project, onBack }) {
             )
           }}
           onClose={() => setShowPublishingPanel(false)}
+        />
+      )}
+
+      {showLearningObjectRepo && (
+        <LearningObjectRepository
+          isOpen={showLearningObjectRepo}
+          onClose={() => setShowLearningObjectRepo(false)}
+          onInsertObject={handleInsertLearningObject}
+        />
+      )}
+
+      {showQuestionBank && (
+        <QuestionBank
+          isOpen={showQuestionBank}
+          onClose={() => setShowQuestionBank(false)}
+          onInsertQuestion={handleInsertQuestion}
         />
       )}
 

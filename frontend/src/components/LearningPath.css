@@ -200,3 +200,89 @@
   font-size: 0.9rem;
   flex: 1;
 }
+
+.prerequisites-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e5ff;
+}
+
+.prerequisites-section h4 {
+  margin: 0 0 0.5rem 0;
+  color: #001f3d;
+}
+
+.prerequisites-section .edit-prereqs-btn {
+  background-color: #1863d6;
+  color: white;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+.prerequisites-section .edit-prereqs-btn:hover {
+  background-color: #0a56c1;
+}
+
+.prereq-options {
+  margin: 0.5rem 0;
+}
+
+.prereq-option {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.prereq-option input {
+  margin-right: 0.5rem;
+}
+
+.prereq-actions {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.prereq-actions button {
+  background-color: #1863d6;
+  color: white;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.prereq-actions button:hover {
+  background-color: #0a56c1;
+}
+
+.prereq-actions button:nth-child(2) {
+  background-color: #f0f4ff;
+  color: #1863d6;
+}
+
+.prereq-actions button:nth-child(2):hover {
+  background-color: #e0e8ff;
+}
+
+.prerequisite-list {
+  margin-top: 0.5rem;
+}
+
+.prereq-item {
+  background-color: #eef2ff;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.no-prereqs {
+  color: #666;
+  font-style: italic;
+  margin-bottom: 0.5rem;
+}
