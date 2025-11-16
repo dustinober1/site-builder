@@ -5,6 +5,11 @@ function PreviewModal({ isOpen, onClose, pages, projectName }) {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [iframeKey, setIframeKey] = useState(0);
 
+  useEffect(() => {
+    // Update the iframe when pages change (for real-time preview)
+    setIframeKey(prev => prev + 1);
+  }, [pages]);
+
   if (!isOpen || !pages || pages.length === 0) {
     return null;
   }
@@ -16,7 +21,7 @@ function PreviewModal({ isOpen, onClose, pages, projectName }) {
     
     let contentHTML = '';
     content.forEach(block => {
-      const { type, content: blockContent, alt, title, url } = block;
+      const { type, content: blockContent, alt, title, url, question, questionType, options, items, targets, imageUrl } = block;
 
       switch(type) {
         case 'text':
@@ -44,6 +49,47 @@ function PreviewModal({ isOpen, onClose, pages, projectName }) {
               Your browser does not support the video tag.
             </video>
             ${blockContent ? `<p>${escapeHtml(blockContent)}</p>` : ''}
+          </section>`;
+          break;
+        case 'knowledge-check':
+          // Render knowledge check preview
+          contentHTML += `<section class="content-block assessment-block" role="region" aria-label="Knowledge check">
+            <div class="assessment-header">
+              <h3>${escapeHtml(block.question || 'Question not set')}</h3>
+              <span class="question-type">${escapeHtml(block.questionType || 'Multiple Choice')}</span>
+            </div>
+            <div class="assessment-preview">
+              ${block.options ? block.options.map(opt => `<div class="option-item"><span>${escapeHtml(opt)}</span></div>`).join('') : ''}
+              ${block.questionType === 'fill-in-the-blank' ? '<input type="text" placeholder="Answer here..." disabled>' : ''}
+              ${block.questionType === 'true-false' ? '<div class="option-item"><span>True</span></div><div class="option-item"><span>False</span></div>' : ''}
+            </div>
+          </section>`;
+          break;
+        case 'drag-and-drop':
+          // Render drag and drop preview
+          contentHTML += `<section class="content-block interactive-block drag-and-drop-block" role="region" aria-label="Drag and drop exercise">
+            <div class="interactive-header">
+              <h3>${escapeHtml(block.question || 'Drag items to correct targets')}</h3>
+            </div>
+            <div class="drag-preview">
+              <div class="items-preview">
+                <h4>Items to Drag</h4>
+                ${block.items ? block.items.map(item => `<div class="item-preview">${escapeHtml(item.content)}</div>`).join('') : ''}
+              </div>
+              <div class="targets-preview">
+                <h4>Drop Targets</h4>
+                ${block.targets ? block.targets.map(target => `<div class="target-preview">${escapeHtml(target.label)}</div>`).join('') : ''}
+              </div>
+            </div>
+          </section>`;
+          break;
+        case 'hotspot':
+          // Render hotspot preview
+          contentHTML += `<section class="content-block interactive-block hotspot-block" role="region" aria-label="Hotspot image exercise">
+            <div class="interactive-header">
+              <h3>${escapeHtml(block.question || 'Click on correct area in image')}</h3>
+            </div>
+            ${block.imageUrl ? `<img src="${escapeHtml(block.imageUrl)}" alt="${escapeHtml(block.alt || 'Interactive image')}" class="hotspot-image-preview" />` : '<div class="image-placeholder">[Image Placeholder]</div>'}
           </section>`;
           break;
         default:
@@ -175,6 +221,112 @@ function PreviewModal({ isOpen, onClose, pages, projectName }) {
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
+    /* Assessment block styles */
+    .assessment-block {
+      border: 2px solid #3498db;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      background-color: #f8f9ff;
+    }
+    
+    .assessment-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #e0e5ff;
+    }
+    
+    .assessment-header h3 {
+      margin: 0;
+      color: #2c3e50;
+      font-size: 1.2rem;
+    }
+    
+    .question-type {
+      background-color: #3498db;
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+    
+    .option-item {
+      margin-bottom: 0.5rem;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background-color: #f8f8f8;
+    }
+    
+    .option-item span {
+      display: block;
+    }
+    
+    .assessment-preview input {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    
+    /* Interactive block styles */
+    .interactive-block {
+      border: 2px solid #9b59b6;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      background-color: #f8f9ff;
+    }
+    
+    .interactive-header h3 {
+      margin: 0 0 1rem 0;
+      color: #2c3e50;
+      font-size: 1.2rem;
+    }
+    
+    .drag-preview {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .items-preview, .targets-preview {
+      flex: 1;
+      padding: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background-color: #f9f9f9;
+    }
+    
+    .item-preview, .target-preview {
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      background-color: #e0f7fa;
+      border: 1px solid #80deea;
+      border-radius: 4px;
+    }
+    
+    .hotspot-image-preview {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    .image-placeholder {
+      text-align: center;
+      padding: 2rem;
+      background-color: #e0e0e0;
+      color: #666;
+      font-style: italic;
+      border-radius: 4px;
+    }
+    
     footer {
       background-color: #2c3e50;
       color: white;
@@ -218,6 +370,10 @@ function PreviewModal({ isOpen, onClose, pages, projectName }) {
       nav ul {
         flex-direction: column;
       }
+      
+      .drag-preview {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
@@ -248,6 +404,7 @@ function PreviewModal({ isOpen, onClose, pages, projectName }) {
   };
 
   const escapeHtml = (text) => {
+    if (!text) return '';
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
@@ -292,7 +449,7 @@ function PreviewModal({ isOpen, onClose, pages, projectName }) {
 
         <div className="preview-content">
           <iframe
-            key={iframeKey}
+            key={iframeKey} // This forces a refresh when key changes
             title={`Preview of ${currentPage.title}`}
             srcDoc={previewHTML}
             sandbox="allow-same-origin"

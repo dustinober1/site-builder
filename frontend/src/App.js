@@ -4,6 +4,7 @@ import Editor from './components/Editor';
 import ProjectList from './components/ProjectList';
 import WelcomeScreen from './components/WelcomeScreen';
 import TemplateLibrary from './components/TemplateLibrary';
+import ErrorBoundary from './components/ErrorBoundary';
 import { getAllProjects } from './utils/projectStorage';
 
 function App() {
@@ -50,24 +51,28 @@ function App() {
   }, []);
 
   return (
-    <div className="app">
-      {currentView === 'welcome' && (
-        <WelcomeScreen onGetStarted={() => setCurrentView('projects')} />
-      )}
-      {currentView === 'projects' && (
-        <ProjectList 
-          onCreateProject={handleCreateProject}
-          onOpenProject={handleOpenProject}
-          onBack={handleBackToWelcome}
-        />
-      )}
-      {currentView === 'editor' && currentProject && (
-        <Editor 
-          project={currentProject}
-          onBack={handleBackToProjects}
-        />
-      )}
-    </div>
+    <ErrorBoundary>
+      <div className="app">
+        {currentView === 'welcome' && (
+          <WelcomeScreen onGetStarted={() => setCurrentView('projects')} />
+        )}
+        {currentView === 'projects' && (
+          <ProjectList
+            onCreateProject={handleCreateProject}
+            onOpenProject={handleOpenProject}
+            onBack={handleBackToWelcome}
+          />
+        )}
+        {currentView === 'editor' && currentProject && (
+          <ErrorBoundary>
+            <Editor
+              project={currentProject}
+              onBack={handleBackToProjects}
+            />
+          </ErrorBoundary>
+        )}
+      </div>
+    </ErrorBoundary>
   );
 }
 

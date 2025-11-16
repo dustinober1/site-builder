@@ -1,0 +1,162 @@
+.version-history-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.version-history-modal {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  width: 600px;
+  max-width: 90%;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.version-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.version-history-header h2 {
+  margin: 0;
+  color: #001f3d;
+  font-size: 1.2rem;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.close-button:hover {
+  background-color: #f0f0f0;
+}
+
+.version-history-content {
+  padding: 1.5rem;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.no-versions {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  margin: 2rem 0;
+}
+
+.version-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.version-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+  background-color: #fafafa;
+}
+
+.version-item:last-child {
+  margin-bottom: 0;
+}
+
+.version-info {
+  flex: 1;
+}
+
+.version-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.version-title h3 {
+  margin: 0;
+  color: #001f3d;
+  font-size: 1rem;
+}
+
+.version-date {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.version-description {
+  margin: 0;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.restore-button {
+  background-color: #1863d6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.restore-button:hover {
+  background-color: #0a56c1;
+}
+
+.restore-button:focus-visible {
+  outline: 2px solid #1863d6;
+  outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+  .version-history-modal {
+    width: 95%;
+    max-height: 90vh;
+  }
+  
+  .version-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .version-title {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  
+  .version-title .version-date {
+    align-self: flex-end;
+  }
+}

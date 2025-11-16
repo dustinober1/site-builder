@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import Onboarding from './Onboarding';
 import './WelcomeScreen.css';
 
 function WelcomeScreen({ onGetStarted }) {

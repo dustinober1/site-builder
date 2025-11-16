@@ -411,6 +411,118 @@ export const autoSaveProject = (project) => {
   });
 };
 
+/**
+ * Save a version of a project for version history
+ */
+export const saveProjectVersion = (project) => {
+  try {
+    // Get existing versions
+    const storageKey = `${STORAGE_KEY}_versions_${project.id}`;
+    const existingVersions = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    
+    // Create a version snapshot
+    const version = {
+      id: Date.now(),
+      projectId: project.id,
+      name: project.name,
+      version: existingVersions.length + 1,
+      createdAt: new Date().toISOString(),
+      projectData: { ...project }
+    };
+    
+    // Add the new version
+    existingVersions.push(version);
+    
+    // Keep only last 10 versions to prevent localStorage bloat
+    if (existingVersions.length > 10) {
+      existingVersions.shift();
+    }
+    
+    localStorage.setItem(storageKey, JSON.stringify(existingVersions));
+    return true;
+  } catch (error) {
+    console.error('Error saving project version:', error);
+    return false;
+  }
+};
+
+/**
+ * Get version history for a project
+ */
+export const getProjectVersions = (projectId) => {
+  try {
+    const storageKey = `${STORAGE_KEY}_versions_${projectId}`;
+    const versions = localStorage.getItem(storageKey);
+    return versions ? JSON.parse(versions) : [];
+  } catch (error) {
+    console.error('Error loading project versions:', error);
+    return [];
+  }
+};
+
+/**
+ * Restore project from a specific version
+ */
+export const restoreProjectVersion = (projectId, versionId) => {
+  try {
+    const versions = getProjectVersions(projectId);
+    const versionToRestore = versions.find(v => v.id === versionId);
+    
+    if (!versionToRestore) {
+      throw new Error('Version not found');
+    }
+    
+    // Save current version before restoring (to preserve history)
+    const currentProjects = getAllProjects();
+    const currentProject = currentProjects.find(p => p.id === projectId);
+    if (currentProject) {
+      saveProjectVersion(currentProject);
+    }
+    
+    // Update the project with the restored version
+    const restoredProject = {
+      ...versionToRestore.projectData,
+      updatedAt: new Date().toISOString(),
+      restoredFromVersion: versionId
+    };
+    
+    return saveProject(restoredProject);
+  } catch (error) {
+    console.error('Error restoring project version:', error);
+    return false;
+  }
+};
+
+/**
+ * Auto-save project (typically called periodically) with version history
+ */
+export const autoSaveProject = (project) => {
+  // Create a version only if there have been significant changes (e.g., 5 minutes apart)
+  const result = saveProject({
+    ...project,
+    lastAutoSave: new Date().toISOString()
+  });
+  
+  // Save version if at least 5 minutes have passed since last version was saved
+  if (result) {
+    const storageKey = `${STORAGE_KEY}_versions_${project.id}`;
+    const versions = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    
+    // Only save if it's been at least 5 minutes since the last version was saved
+    const now = new Date().getTime();
+    const fiveMinutes = 5 * 60 * 1000; // 5 minutes in milliseconds
+    
+    if (versions.length === 0 || (now - new Date(versions[versions.length - 1].createdAt).getTime()) > fiveMinutes) {
+      saveProjectVersion({
+        ...project,
+        lastAutoSave: new Date().toISOString()
+      });
+    }
+  }
+  
+  return result;
+};
+
 export default {
   getAllProjects,
   saveProject,
@@ -422,5 +534,8 @@ export default {
   duplicateProject,
   searchProjects,
   getProjectStats,
-  autoSaveProject
+  autoSaveProject,
+  saveProjectVersion,
+  getProjectVersions,
+  restoreProjectVersion
 };

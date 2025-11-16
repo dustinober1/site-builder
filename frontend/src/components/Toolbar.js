@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { memo } from 'react';
+import PropTypes from 'prop-types';
 import './Toolbar.css';
 
-function Toolbar({ onAddBlock }) {
+const Toolbar = memo(function Toolbar({ onAddBlock }) {
   const blockTypes = [
     { type: 'text', label: 'Text', icon: '📝' },
     { type: 'heading', label: 'Heading', icon: '📌' },
@@ -48,6 +49,12 @@ function Toolbar({ onAddBlock }) {
       </div>
     </aside>
   );
-}
+});
+
+Toolbar.displayName = 'Toolbar';
+
+Toolbar.propTypes = {
+  onAddBlock: PropTypes.func.isRequired
+};
 
 export default Toolbar;

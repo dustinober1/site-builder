@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { memo } from 'react';
+import PropTypes from 'prop-types';
 import AssessmentBlock from './AssessmentBlock';
 import { DragAndDropBlock, HotspotBlock } from './InteractiveBlock';
 import InteractiveVideoBlock from './InteractiveVideoBlock';
 import './ContentBlock.css';
 
-function ContentBlock({
+const ContentBlock = memo(function ContentBlock({
   block,
   isSelected,
   onSelect,
@@ -146,6 +147,22 @@ function ContentBlock({
       </div>
     </article>
   );
-}
+});
+
+ContentBlock.displayName = 'ContentBlock';
+
+ContentBlock.propTypes = {
+  block: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    type: PropTypes.string.isRequired,
+    content: PropTypes.string,
+    url: PropTypes.string
+  }).isRequired,
+  isSelected: PropTypes.bool.isRequired,
+  onSelect: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  onMoveUp: PropTypes.func,
+  onMoveDown: PropTypes.func
+};
 
 export default ContentBlock;

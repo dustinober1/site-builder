@@ -1,0 +1,249 @@
+.onboarding-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.onboarding-modal {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 600px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.4s ease-out;
+  overflow: hidden;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.onboarding-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  background: linear-gradient(135deg, #001f3d, #151983);
+  color: white;
+}
+
+.onboarding-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.skip-button {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.skip-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.onboarding-progress {
+  padding: 1.5rem;
+  background-color: #f8f9ff;
+  border-bottom: 1px solid #e0e5ff;
+}
+
+.progress-bar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.progress-step {
+  flex: 1;
+  height: 6px;
+  background-color: #e0e0e0;
+  margin: 0 2px;
+  border-radius: 3px;
+  position: relative;
+}
+
+.progress-step.active {
+  background: linear-gradient(90deg, #1863d6, #0a56c1);
+}
+
+.progress-step.current {
+  background: linear-gradient(90deg, #1863d6, #0a56c1);
+}
+
+.progress-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -2px;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 4px;
+  background-color: #1863d6;
+  border-radius: 50%;
+}
+
+.step-counter {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.onboarding-content {
+  flex: 1;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  overflow-y: auto;
+}
+
+.illustration {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+}
+
+.onboarding-content h3 {
+  margin: 0 0 1rem 0;
+  color: #001f3d;
+  font-size: 1.5rem;
+}
+
+.onboarding-content p {
+  margin: 0;
+  color: #333;
+  line-height: 1.6;
+  font-size: 1.1rem;
+}
+
+.onboarding-navigation {
+  display: flex;
+  justify-content: space-between;
+  padding: 1.5rem;
+  background-color: #f8f9ff;
+  border-top: 1px solid #e0e5ff;
+}
+
+.nav-button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.prev-button {
+  background-color: #f0f4ff;
+  color: #1863d6;
+}
+
+.prev-button:hover:not(:disabled) {
+  background-color: #e0e8ff;
+}
+
+.prev-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.next-button {
+  background: linear-gradient(135deg, #1863d6, #0a56c1);
+  color: white;
+}
+
+.next-button:hover {
+  background: linear-gradient(135deg, #0a56c1, #0847a2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(24, 99, 214, 0.3);
+}
+
+.next-button:active {
+  transform: translateY(0);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .onboarding-modal {
+    width: 95%;
+    max-height: 90vh;
+  }
+  
+  .onboarding-header {
+    padding: 1rem 1.5rem;
+  }
+  
+  .onboarding-header h2 {
+    font-size: 1.2rem;
+  }
+  
+  .onboarding-content {
+    padding: 1.5rem;
+  }
+  
+  .illustration {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+  
+  .onboarding-content h3 {
+    font-size: 1.3rem;
+  }
+  
+  .onboarding-content p {
+    font-size: 1rem;
+  }
+  
+  .onboarding-navigation {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .nav-button {
+    width: 100%;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-overlay,
+  .onboarding-modal {
+    animation: none;
+  }
+  
+  .onboarding-modal {
+    transition: none;
+  }
+}
