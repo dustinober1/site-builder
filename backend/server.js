@@ -11,6 +11,7 @@ const CollaborationServer = require('./collaboration');
 const logger = require('./config/logger');
 const { validators } = require('./middleware/validation');
 const securityMiddleware = require('./middleware/security');
+const templateRoutes = require('./routes/templates');
 
 const app = express();
 const server = http.createServer(app);
@@ -1981,6 +1982,9 @@ function escapeHtml(text) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 }
+
+// Template Routes
+app.use('/api/templates', templateRoutes);
 
 // Error Handler (must be last)
 app.use(errorHandler);

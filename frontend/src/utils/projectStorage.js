@@ -3,6 +3,8 @@
  * Handles saving, loading, and managing projects with localStorage and templates
  */
 
+import { INDUSTRY_TEMPLATES, getTemplateSuggestions } from '../data/industryTemplates';
+
 export const STORAGE_KEY = 'siteBuilder_projects';
 export const TEMPLATES_KEY = 'siteBuilder_templates';
 
@@ -329,13 +331,84 @@ export const createProjectFromTemplate = (templateId, projectName) => {
 };
 
 /**
- * Get all available templates
+ * Get all available templates (including industry templates)
  */
 export const getAvailableTemplates = () => {
-  return Object.entries(AVAILABLE_TEMPLATES).map(([key, template]) => ({
+  const legacyTemplates = Object.entries(AVAILABLE_TEMPLATES).map(([key, template]) => ({
     ...template,
     templateId: key
   }));
+
+  const industryTemplates = Object.entries(INDUSTRY_TEMPLATES).map(([key, template]) => ({
+    ...template,
+    templateId: key
+  }));
+
+  return [...legacyTemplates, ...industryTemplates];
+};
+
+/**
+ * Get industry templates only
+ */
+export const getIndustryTemplatesList = () => {
+  return Object.entries(INDUSTRY_TEMPLATES).map(([key, template]) => ({
+    ...template,
+    templateId: key
+  }));
+};
+
+/**
+ * Get template suggestions based on keywords
+ */
+export const getSmartTemplateSuggestions = (keywords = []) => {
+  return getTemplateSuggestions(keywords);
+};
+
+/**
+ * Get a specific template by ID (supports both legacy and industry templates)
+ */
+export const getTemplateById = (templateId) => {
+  // Check legacy templates first
+  if (AVAILABLE_TEMPLATES[templateId]) {
+    return { ...AVAILABLE_TEMPLATES[templateId], templateId };
+  }
+
+  // Check industry templates
+  if (INDUSTRY_TEMPLATES[templateId]) {
+    return { ...INDUSTRY_TEMPLATES[templateId], templateId };
+  }
+
+  return null;
+};
+
+/**
+ * Create a new project from an industry template
+ */
+export const createProjectFromIndustryTemplate = (templateId, projectName) => {
+  const template = getTemplateById(templateId);
+
+  if (!template) {
+    throw new Error('Template not found');
+  }
+
+  const newProject = {
+    id: Date.now(),
+    name: projectName || template.name,
+    description: template.description,
+    templateId: templateId,
+    industry: template.industry || template.category,
+    suggestedQuestions: template.suggestedQuestions || [],
+    suggestedLearningObjects: template.suggestedLearningObjects || [],
+    pages: template.pages.map(page => ({
+      ...page,
+      id: Date.now() + Math.random()
+    })),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  saveProject(newProject);
+  return newProject;
 };
 
 /**

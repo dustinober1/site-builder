@@ -1,23 +1,59 @@
 import React, { useState } from 'react';
 import './TemplateGallery.css';
-import { getAvailableTemplates } from '../utils/projectStorage';
+import { getAvailableTemplates, getTemplateById } from '../utils/projectStorage';
+import IndustrySelector from './TemplateLibrary/IndustrySelector';
+import TemplateSmartSuggestions from './TemplateLibrary/TemplateSmartSuggestions';
 
 function TemplateGallery({ onSelectTemplate, onCancel }) {
   const [templates] = useState(getAvailableTemplates());
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [projectName, setProjectName] = useState('');
+  const [showIndustrySelector, setShowIndustrySelector] = useState(false);
+  const [showSmartSuggestions, setShowSmartSuggestions] = useState(false);
+  const [selectedIndustry, setSelectedIndustry] = useState(null);
 
   const handleSelectTemplate = (template) => {
     setSelectedTemplate(template);
     setProjectName(template.name);
   };
 
+  const handleIndustrySelect = (industry) => {
+    setSelectedIndustry(industry);
+    const industryTemplate = getTemplateById(industry);
+    if (industryTemplate) {
+      handleSelectTemplate(industryTemplate);
+      setShowSmartSuggestions(true);
+      setShowIndustrySelector(false);
+    }
+  };
+
   const handleCreate = () => {
     if (projectName.trim() && selectedTemplate) {
-      onSelectTemplate(selectedTemplate.templateId, projectName);
-      setSelectedTemplate(null);
-      setProjectName('');
+      // If this is an industry template and not showing suggestions yet, show suggestions
+      if (selectedTemplate.suggestedQuestions?.length > 0 || selectedTemplate.suggestedLearningObjects?.length > 0) {
+        setShowSmartSuggestions(true);
+      } else {
+        onSelectTemplate(selectedTemplate.templateId, projectName);
+        setSelectedTemplate(null);
+        setProjectName('');
+      }
     }
+  };
+
+  const handleAddSuggestions = async (suggestions) => {
+    // In a real app, this would add the suggestions to the project
+    // For now, just proceed with course creation
+    onSelectTemplate(selectedTemplate.templateId, projectName);
+    setSelectedTemplate(null);
+    setProjectName('');
+    setShowSmartSuggestions(false);
+  };
+
+  const handleCreateCourse = () => {
+    onSelectTemplate(selectedTemplate.templateId, projectName);
+    setSelectedTemplate(null);
+    setProjectName('');
+    setShowSmartSuggestions(false);
   };
 
   const categoryGroups = templates.reduce((acc, template) => {
@@ -38,18 +74,46 @@ function TemplateGallery({ onSelectTemplate, onCancel }) {
   return (
     <div className="template-gallery-overlay">
       <div className="template-gallery">
-        <div className="gallery-header">
-          <h2>Choose a Template</h2>
-          <button 
-            className="close-button"
-            onClick={onCancel}
-            aria-label="Close template gallery"
-          >
-            ×
-          </button>
-        </div>
-
-        {selectedTemplate ? (
+        {showSmartSuggestions && selectedTemplate ? (
+          <>
+            <div className="gallery-header">
+              <h2>Enhance Your Course</h2>
+              <button
+                className="close-button"
+                onClick={onCancel}
+                aria-label="Close template gallery"
+              >
+                ×
+              </button>
+            </div>
+            <div className="gallery-content">
+              <TemplateSmartSuggestions
+                template={selectedTemplate}
+                onAddSuggestions={handleAddSuggestions}
+                onCreateProject={handleCreateCourse}
+              />
+            </div>
+          </>
+        ) : showIndustrySelector ? (
+          <>
+            <div className="gallery-header">
+              <h2>Get Started</h2>
+              <button
+                className="close-button"
+                onClick={onCancel}
+                aria-label="Close template gallery"
+              >
+                ×
+              </button>
+            </div>
+            <div className="gallery-content">
+              <IndustrySelector
+                onSelectIndustry={handleIndustrySelect}
+                onCancel={() => setShowIndustrySelector(false)}
+              />
+            </div>
+          </>
+        ) : selectedTemplate ? (
           <div className="template-detail">
             <div className="detail-content">
               <h3>{selectedTemplate.name}</h3>
@@ -102,6 +166,25 @@ function TemplateGallery({ onSelectTemplate, onCancel }) {
           </div>
         ) : (
           <div className="gallery-content">
+            <div className="gallery-cta-section">
+              <div className="gallery-cta-card">
+                <div className="cta-icon">⚡</div>
+                <h3>Get Started Faster</h3>
+                <p>Choose an industry domain to get a pre-built template with suggested assessments and learning objectives</p>
+                <button
+                  className="cta-button"
+                  onClick={() => setShowIndustrySelector(true)}
+                  aria-label="Browse industry templates"
+                >
+                  Browse Industry Templates
+                </button>
+              </div>
+            </div>
+
+            <div className="gallery-divider">
+              <span>or</span>
+            </div>
+
             {Object.entries(categoryGroups).map(([category, temps]) => (
               <section key={category} className="template-category">
                 <h3 className="category-title">{categoryLabels[category]}</h3>
