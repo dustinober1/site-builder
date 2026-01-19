@@ -80,6 +80,12 @@ Your project is automatically saved to your browser's local storage.
 - Ideal for scenario-based training
 - **How to add:** Click "Branching" button
 
+#### 8. **Advanced Pedagogical Tools**
+- **Learning Flow Analyzer**: Visualizes content progression and identifies gaps.
+- **Quality Scorecard**: Automated checks for accessibility and readability.
+- **Learner Simulator**: Predicts outcomes for different learner personas.
+- **Review Engine**: Real-time collaboration and commenting for teams.
+
 ### Editing Content Blocks
 
 1. **Click on any block** to select it

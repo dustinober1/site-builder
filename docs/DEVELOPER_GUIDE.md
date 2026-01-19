@@ -342,6 +342,20 @@ const upload = multer({
 
 ## API Reference
 
+### Pedagogical Analysis (`frontend/src/utils/pedagogicalAnalysis.js`)
+- `analyzeContentFlow(blocks)`: Returns a score and list of issues based on content structure.
+- `detectLearningGaps(blocks, objectives)`: Identifies objectives not covered by content.
+- `mapObjectivesAlignment(blocks, objectives)`: Maps blocks to objectives and calculates coverage.
+
+### Quality Metrics (`frontend/src/utils/qualityMetrics.js`)
+- `calculateQualityMetrics(projectData)`: Returns accessibility, readability, and overall quality scores.
+
+### Learner Simulation (`frontend/src/utils/learnerSimulation.js`)
+- `simulateLearner(blocks, persona)`: Predicts learner outcomes based on persona profiles.
+
+### Collaboration (`backend/collaboration.js`)
+- WebSocket-based real-time commenting and presence system.
+
 ### Health Check
 
 **Endpoint:** `GET /api/health`

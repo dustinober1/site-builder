@@ -69,6 +69,27 @@ const schemas = {
       background: Joi.string().pattern(/^#[0-9A-Fa-f]{6}$/),
       text: Joi.string().pattern(/^#[0-9A-Fa-f]{6}$/)
     }).optional()
+  }),
+
+  // QA Validation schemas
+  qaScore: Joi.object({
+    scores: Joi.object({
+      overall: Joi.number().min(0).max(100).required(),
+      accessibility: Joi.number().min(0).max(100).required(),
+      performance: Joi.number().min(0).max(100).required(),
+      pedagogical: Joi.number().min(0).max(100).required()
+    }).required()
+  }),
+
+  reviewStage: Joi.object({
+    status: Joi.string().valid('draft', 'in-review', 'approved', 'rejected').optional(),
+    reviewer: Joi.string().min(1).optional(),
+    comment: Joi.string().min(1).optional()
+  }),
+
+  branch: Joi.object({
+    branchName: Joi.string().min(1).max(50).required(),
+    sourceVersion: Joi.string().required()
   })
 };
 
@@ -126,6 +147,11 @@ const validators = {
   validateContentBlock: validate(schemas.contentBlock),
   validateAssessmentBlock: validate(schemas.assessmentBlock),
   validateProjectName: validate(Joi.object({ projectName: schemas.projectName })),
+  
+  // QA Validators
+  validateQaScore: validate(schemas.qaScore),
+  validateReviewStage: validate(schemas.reviewStage),
+  validateBranch: validate(schemas.branch),
   
   // File upload validation
   validateImageUpload: (req, res, next) => {

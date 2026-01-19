@@ -15,6 +15,7 @@ import GamificationPanel from '../GamificationPanel';
 import OfflineSyncManager from '../OfflineSyncManager';
 import AccessibilityChecker from '../AccessibilityChecker';
 import AnalyticsDashboard from '../AnalyticsDashboard';
+import LearningFlowAnalyzer from '../LearningFlowAnalyzer';
 import TemplateLibrary from '../TemplateLibrary';
 import LearningObjectRepository from '../LearningObjectRepository';
 import QuestionBank from '../QuestionBank';
@@ -120,6 +121,12 @@ function EditorContent({
             >
               Analytics
             </button>
+            <button
+              className={`tab-button ${activeTab === 'pedagogy' ? 'active' : ''}`}
+              onClick={() => onSetActiveTab('pedagogy')}
+            >
+              Pedagogy
+            </button>
           </div>
           <div className="panel-content">
             {activeTab === 'properties' && (
@@ -133,6 +140,12 @@ function EditorContent({
               <AnalyticsDashboard
                 project={project}
                 blocks={blocks}
+              />
+            )}
+            {activeTab === 'pedagogy' && (
+              <LearningFlowAnalyzer
+                blocks={blocks}
+                objectives={project.objectives || []}
               />
             )}
           </div>

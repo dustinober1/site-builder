@@ -63,6 +63,7 @@
 | **[SAVE_LOAD_FEATURES.md](SAVE_LOAD_FEATURES.md)** | Detailed feature documentation | Instructional designers |
 | **[SAVE_LOAD_QUICK_REFERENCE.md](SAVE_LOAD_QUICK_REFERENCE.md)** | Quick reference, keyboard shortcuts | Everyone |
 | **[TEMPLATE_COURSE_README.md](TEMPLATE_COURSE_README.md)** | Template system explanation | Course creators |
+| **[INDUSTRY_TEMPLATES_GUIDE.md](INDUSTRY_TEMPLATES_GUIDE.md)** | Industry-specific template system | Developers, Course creators |
 
 **Quick Links**:
 - Projects auto-save every 2 seconds ✅
@@ -189,6 +190,7 @@
 - `VISUAL_OVERVIEW.md` - Visual guide
 
 ### Reference & Summary
+- `INDUSTRY_TEMPLATES_GUIDE.md` - Industry-specific template system
 - `QUICK_REFERENCE.md` - General quick reference
 - `FILE_MANIFEST.md` - File listing
 - `UPDATES_SUMMARY.md` - Recent updates

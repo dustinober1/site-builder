@@ -1,9 +1,13 @@
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
+const csrf = require('csurf');
 const logger = require('../config/logger');
 
 // Security middleware configuration
 const securityMiddleware = {
+  // CSRF Protection
+  csrfProtection: csrf({ cookie: true }),
+
   // Helmet configuration for security headers
   helmet: helmet({
     contentSecurityPolicy: {

@@ -12,6 +12,7 @@ const logger = require('./config/logger');
 const { validators } = require('./middleware/validation');
 const securityMiddleware = require('./middleware/security');
 const templateRoutes = require('./routes/templates');
+const qaRoutes = require('./routes/qa');
 
 const app = express();
 const server = http.createServer(app);
@@ -42,6 +43,10 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(logger.httpLogger);
 app.use('/uploads', express.static('uploads'));
 app.use('/sites', express.static('../output-sites'));
+
+// API Routes
+app.use('/api/templates', templateRoutes);
+app.use('/api/qa', qaRoutes);
 
 // Apply rate limiting
 app.use(securityMiddleware.rateLimiters.general);

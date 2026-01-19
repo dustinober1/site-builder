@@ -51,8 +51,98 @@ class CollaborationServer {
       case 'user-info':
         this.handleUserInfo(ws, message);
         break;
+      case 'review-action':
+        this.handleReviewAction(ws, message);
+        break;
+      case 'add-comment':
+        this.handleAddComment(ws, message);
+        break;
+      case 'resolve-comment':
+        this.handleResolveComment(ws, message);
+        break;
       default:
         console.warn(`[COLLAB] Unknown message type: ${message.type}`);
+    }
+  }
+
+  handleReviewAction(ws, message) {
+    const { roomId, action, stage, userId, comments } = message;
+    const room = this.rooms.get(roomId);
+    if (!room) return;
+
+    if (!room.reviewState) {
+      room.reviewState = {
+        currentStage: 'Draft',
+        history: [],
+        approvals: {}
+      };
+    }
+
+    const stages = ['Draft', 'Expert', 'Accessibility', 'Legal', 'Final'];
+    const currentIndex = stages.indexOf(room.reviewState.currentStage);
+
+    if (action === 'approve') {
+      room.reviewState.approvals[stage] = { userId, timestamp: new Date().toISOString() };
+      if (currentIndex < stages.length - 1 && stage === room.reviewState.currentStage) {
+        room.reviewState.currentStage = stages[currentIndex + 1];
+      }
+    } else if (action === 'reject') {
+      room.reviewState.currentStage = 'Draft'; // Reset to draft on rejection
+      room.reviewState.approvals = {};
+    }
+
+    room.reviewState.history.push({
+      stage,
+      action,
+      userId,
+      comments,
+      timestamp: new Date().toISOString()
+    });
+
+    this.broadcastToRoom(roomId, {
+      type: 'review-state-update',
+      reviewState: room.reviewState
+    });
+  }
+
+  handleAddComment(ws, message) {
+    const { roomId, comment } = message;
+    const room = this.rooms.get(roomId);
+    if (!room) return;
+
+    if (!room.comments) room.comments = [];
+    
+    const newComment = {
+      id: Date.now().toString(),
+      ...comment,
+      timestamp: new Date().toISOString(),
+      resolved: false,
+      replies: []
+    };
+
+    room.comments.push(newComment);
+    this.broadcastToRoom(roomId, {
+      type: 'comment-added',
+      comment: newComment
+    });
+  }
+
+  handleResolveComment(ws, message) {
+    const { roomId, commentId, userId } = message;
+    const room = this.rooms.get(roomId);
+    if (!room) return;
+
+    const comment = room.comments?.find(c => c.id === commentId);
+    if (comment) {
+      comment.resolved = true;
+      comment.resolvedBy = userId;
+      comment.resolvedAt = new Date().toISOString();
+
+      this.broadcastToRoom(roomId, {
+        type: 'comment-resolved',
+        commentId,
+        userId
+      });
     }
   }
   

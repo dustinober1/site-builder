@@ -8,7 +8,9 @@ const AnalyticsDashboard = ({ project, blocks }) => {
     completionRate: 0,
     assessmentScores: [],
     engagementMetrics: {},
-    learnerProgress: []
+    learnerProgress: [],
+    difficultyProgression: [],
+    engagementHeatmap: []
   });
 
   const [timeRange, setTimeRange] = useState('7d'); // 7d, 30d, 90d
@@ -43,13 +45,24 @@ const AnalyticsDashboard = ({ project, blocks }) => {
           progress: Math.floor(Math.random() * 100),
           timeSpent: Math.floor(Math.random() * 120),
           lastActive: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString()
+        })),
+        difficultyProgression: (blocks || []).map((block, i) => ({
+          id: block.id,
+          label: `Block ${i + 1}`,
+          difficulty: Math.random() * 10,
+          dropOffRate: Math.random() * 15
+        })),
+        engagementHeatmap: (blocks || []).map((block, i) => ({
+          id: block.id,
+          label: `Block ${i + 1}`,
+          engagement: Math.random() * 100
         }))
       };
       
       setAnalyticsData(mockData);
       setLoading(false);
     }, 1000);
-  }, [project, timeRange]);
+  }, [project, timeRange, blocks]);
 
   const formatTime = (minutes) => {
     const hrs = Math.floor(minutes / 60);
@@ -141,6 +154,46 @@ const AnalyticsDashboard = ({ project, blocks }) => {
       <div className="charts-section">
         <ChartPlaceholder title="Page Views Over Time" />
         <ChartPlaceholder title="Assessment Scores" />
+      </div>
+
+      <div className="advanced-analytics-section">
+        <div className="difficulty-progression">
+          <h4>Difficulty Progression Analysis</h4>
+          <div className="progression-chart">
+            {analyticsData.difficultyProgression.map((item, i) => (
+              <div key={item.id} className="progression-bar-container">
+                <div 
+                  className="progression-bar" 
+                  style={{ 
+                    height: `${item.difficulty * 10}%`,
+                    backgroundColor: item.difficulty > 7 ? '#dc3545' : item.difficulty > 4 ? '#ffc107' : '#28a745'
+                  }}
+                  title={`Difficulty: ${item.difficulty.toFixed(1)}`}
+                ></div>
+                <span className="bar-label">{item.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="engagement-heatmap">
+          <h4>Engagement Heatmap</h4>
+          <div className="heatmap-grid">
+            {analyticsData.engagementHeatmap.map((item) => (
+              <div 
+                key={item.id} 
+                className="heatmap-cell"
+                style={{ 
+                  backgroundColor: `rgba(0, 123, 255, ${item.engagement / 100})`,
+                  color: item.engagement > 50 ? '#fff' : '#000'
+                }}
+                title={`${item.label}: ${item.engagement.toFixed(1)}% engagement`}
+              >
+                {Math.round(item.engagement)}%
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div className="assessments-section">

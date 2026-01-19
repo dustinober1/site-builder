@@ -1,0 +1,82 @@
+.learning-flow-analyzer {
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  margin: 10px;
+}
+
+.analyzer-section {
+  margin-bottom: 25px;
+  background: white;
+  padding: 15px;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+}
+
+.analyzer-section h3 {
+  margin-top: 0;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 8px;
+  color: #343a40;
+}
+
+.flow-score-badge {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-weight: bold;
+  margin-left: 10px;
+}
+
+.score-high { background: #d4edda; color: #155724; }
+.score-med { background: #fff3cd; color: #856404; }
+.score-low { background: #f8d7da; color: #721c24; }
+
+.issue-list, .gap-list {
+  list-style: none;
+  padding: 0;
+}
+
+.issue-item, .gap-item {
+  padding: 8px 12px;
+  margin-bottom: 5px;
+  border-left: 4px solid #dc3545;
+  background: #fff5f5;
+}
+
+.mapping-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.mapping-card {
+  padding: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+}
+
+.mapping-card.covered { border-top: 4px solid #28a745; }
+.mapping-card.uncovered { border-top: 4px solid #dc3545; }
+
+.timeline-container {
+  height: 60px;
+  background: #eee;
+  border-radius: 30px;
+  position: relative;
+  margin: 20px 0;
+  overflow: hidden;
+  display: flex;
+}
+
+.timeline-segment {
+  height: 100%;
+  border-right: 1px solid rgba(255,255,255,0.3);
+  transition: width 0.3s ease;
+}
+
+.segment-text { background: #6c757d; }
+.segment-interaction { background: #007bff; }
+.segment-assessment { background: #28a745; }
+.segment-media { background: #17a2b8; }

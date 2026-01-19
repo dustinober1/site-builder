@@ -8,9 +8,61 @@ const CollaborationPanel = ({ project, onCollaborationUpdate }) => {
   const [collaborationLink, setCollaborationLink] = useState('');
   const [invitationMessage, setInvitationMessage] = useState('');
   const [showShareModal, setShowShareModal] = useState(false);
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState('');
+  const [mentionSearch, setMentionSearch] = useState('');
   
   const wsRef = useRef(null);
   const userIdRef = useRef(null);
+
+  const handleAddComment = () => {
+    if (!newComment.trim()) return;
+
+    const commentData = {
+      text: newComment,
+      author: localStorage.getItem('collab_user_name') || 'Anonymous',
+      userId: userIdRef.current,
+      mentions: extractMentions(newComment)
+    };
+
+    if (isConnected && wsRef.current) {
+      wsRef.current.send(JSON.stringify({
+        type: 'add-comment',
+        roomId: project.id.toString(),
+        comment: commentData
+      }));
+    } else {
+      // Local fallback
+      setComments([...comments, {
+        id: Date.now().toString(),
+        ...commentData,
+        timestamp: new Date().toISOString(),
+        resolved: false
+      }]);
+    }
+    setNewComment('');
+  };
+
+  const extractMentions = (text) => {
+    const mentionRegex = /@(\w+)/g;
+    const matches = text.match(mentionRegex);
+    return matches ? matches.map(m => m.substring(1)) : [];
+  };
+
+  const resolveComment = (commentId) => {
+    if (isConnected && wsRef.current) {
+      wsRef.current.send(JSON.stringify({
+        type: 'resolve-comment',
+        roomId: project.id.toString(),
+        commentId,
+        userId: userIdRef.current
+      }));
+    } else {
+      setComments(comments.map(c => 
+        c.id === commentId ? { ...c, resolved: true, resolvedBy: userIdRef.current } : c
+      ));
+    }
+  };
 
   // Generate unique user ID if not exists
   useEffect(() => {
@@ -143,6 +195,39 @@ const CollaborationPanel = ({ project, onCollaborationUpdate }) => {
 
       {isConnected && (
         <div className="collaboration-info">
+          <div className="comments-section">
+            <h4>Threaded Feedback</h4>
+            <div className="comments-list">
+              {comments.map(comment => (
+                <div key={comment.id} className={`comment-item ${comment.resolved ? 'resolved' : ''}`}>
+                  <div className="comment-header">
+                    <span className="comment-author">{comment.author}</span>
+                    <span className="comment-time">{new Date(comment.timestamp).toLocaleTimeString()}</span>
+                  </div>
+                  <div className="comment-text">
+                    {comment.text.split(/(@\w+)/).map((part, i) => 
+                      part.startsWith('@') ? <span key={i} className="mention">{part}</span> : part
+                    )}
+                  </div>
+                  {!comment.resolved && (
+                    <button onClick={() => resolveComment(comment.id)} className="resolve-btn">
+                      Resolve
+                    </button>
+                  )}
+                  {comment.resolved && <span className="resolved-tag">Resolved by {comment.resolvedBy}</span>}
+                </div>
+              ))}
+            </div>
+            <div className="comment-input">
+              <textarea 
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Add a comment... use @name to mention"
+              />
+              <button onClick={handleAddComment}>Post</button>
+            </div>
+          </div>
+
           <div className="users-list">
             <h4>Participants ({users.length})</h4>
             <div className="users-container">
